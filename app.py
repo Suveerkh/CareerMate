@@ -1980,6 +1980,6 @@ if __name__ == "__main__":
             flash("An error occurred while generating your PDF report", "error")
             return redirect(url_for("career_test_history"))
     
-    # Use environment variable for port with a fallback to 5001
+    # Only run the app directly when this file is executed directly (not imported)
     port = int(os.environ.get("PORT", 5001))
     app.run(host='0.0.0.0', port=port, debug=False)
