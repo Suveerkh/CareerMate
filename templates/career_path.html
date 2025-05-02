@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ career.title }} - CareerMate</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .career-header {
+            background-color: #f8f9fa;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+        
+        .career-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #007bff;
+        }
+        
+        .career-subtitle {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+        }
+        
+        .career-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-title {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #212529;
+        }
+        
+        .career-section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #343a40;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+        
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .skill-tag {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .education-item {
+            margin-bottom: 1rem;
+        }
+        
+        .education-degree {
+            font-weight: bold;
+            color: #343a40;
+        }
+        
+        .education-details {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .reviews-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+        
+        .review-card {
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .review-author {
+            font-weight: bold;
+        }
+        
+        .review-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .star-rating {
+            color: #ffc107;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('careers') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/career_mate - logo.png') }}" alt="CareerMate Logo" class="navbar-logo">
+            CareerMate
+        </a>
+        
+        <ul class="navbar-nav">
+            {% for cat_id, cat in CAREER_CATEGORIES.items() %}
+            <li class="nav-item career-dropdown">
+                <a href="{{ url_for('career_category', category_id=cat_id) }}" class="nav-link {% if cat_id == category_id %}active{% endif %}">{{ cat.name }}</a>
+                <div class="career-dropdown-content">
+                    {% for c in cat.careers %}
+                    <a href="{{ url_for('career_path', career_id=c.id) }}" class="dropdown-item {% if c.id == career.id %}active{% endif %}">{{ c.title }}</a>
+                    {% endfor %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        <div style="display: flex; align-items: center;">
+            <form action="{{ url_for('search') }}" method="GET" class="search-container">
+                <input type="text" name="q" placeholder="Search careers..." class="search-input">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            
+            <div class="dropdown">
+                <div class="user-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}" class="dropdown-item">Profile</a>
+                    <a href="{{ url_for('edit_profile') }}" class="dropdown-item">Edit Profile</a>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="main-content">
+            <div class="career-header">
+                <h1 class="career-title">{{ career.title }}</h1>
+                <p class="career-subtitle">Explore a career as a {{ career.title }} and discover the skills, education, and experience needed for success in this field.</p>
+                
+                <div class="career-stats">
+                    <div class="stat-card">
+                        <div class="stat-title">Average Salary</div>
+                        <div class="stat-value">$90,000 - $120,000</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-title">Job Growth</div>
+                        <div class="stat-value">15% (Faster than average)</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-title">Education Required</div>
+                        <div class="stat-value">Bachelor's/Master's Degree</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="career-section">
+                <h2 class="section-title">Career Overview</h2>
+                <p>{{ career.title }}s are professionals who [career description]. They work in various industries including [industries], and are responsible for [key responsibilities].</p>
+                <p>This career path offers opportunities for growth and specialization in areas such as [specializations].</p>
+            </div>
+            
+            <div class="career-section">
+                <h2 class="section-title">Required Skills</h2>
+                <p>To succeed as a {{ career.title }}, you'll need a combination of technical and soft skills:</p>
+                
+                <h3>Technical Skills</h3>
+                <div class="skill-list">
+                    <span class="skill-tag">Skill 1</span>
+                    <span class="skill-tag">Skill 2</span>
+                    <span class="skill-tag">Skill 3</span>
+                    <span class="skill-tag">Skill 4</span>
+                    <span class="skill-tag">Skill 5</span>
+                </div>
+                
+                <h3>Soft Skills</h3>
+                <div class="skill-list">
+                    <span class="skill-tag">Communication</span>
+                    <span class="skill-tag">Problem Solving</span>
+                    <span class="skill-tag">Teamwork</span>
+                    <span class="skill-tag">Time Management</span>
+                    <span class="skill-tag">Adaptability</span>
+                </div>
+            </div>
+            
+            <div class="career-section">
+                <h2 class="section-title">Education and Certification</h2>
+                
+                <div class="education-item">
+                    <div class="education-degree">Bachelor's Degree</div>
+                    <div class="education-details">A bachelor's degree in [relevant fields] is typically required.</div>
+                </div>
+                
+                <div class="education-item">
+                    <div class="education-degree">Master's Degree (Recommended)</div>
+                    <div class="education-details">A master's degree in [relevant fields] can provide advanced knowledge and improve job prospects.</div>
+                </div>
+                
+                <div class="education-item">
+                    <div class="education-degree">Certifications</div>
+                    <div class="education-details">Professional certifications such as [certifications] can demonstrate expertise and commitment to the field.</div>
+                </div>
+            </div>
+            
+            <div class="career-section">
+                <h2 class="section-title">Job Outlook</h2>
+                <p>The job outlook for {{ career.title }}s is positive, with a projected growth rate of 15% over the next decade, which is faster than the average for all occupations.</p>
+                <p>Factors contributing to this growth include [growth factors].</p>
+            </div>
+            
+            <div class="reviews-section">
+                <h2 class="section-title">Career Reviews</h2>
+                <p>This section will allow users to read and submit reviews about this career path.</p>
+                <div style="background-color: #f0f0f0; padding: 15px; border-radius: 6px; margin-top: 15px;">
+                    <p><strong>Coming Soon!</strong> We're currently setting up our review system. Check back later to share your experiences and read reviews from others.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

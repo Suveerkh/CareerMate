@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}CareerMate - Home{% endblock %}
+
+{% block content %}
+    <div class="home-container">
+        <h1>Welcome to CareerMate</h1>
+        <p>Your career guidance companion</p>
+        
+        <div class="home-actions">
+            <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+        </div>
+    </div>
+{% endblock %}

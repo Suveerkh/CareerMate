@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Career Options for PhD Scholars - CareerMate{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <h1>Career Options for PhD Scholars</h1>
+    
+    <div class="career-section">
+        <h2>Research and Academic Careers</h2>
+        <p>As a PhD graduate, you have a wide range of career options in academia, research, and industry. Here are some popular career paths:</p>
+        
+        <div class="career-grid">
+            <div class="career-card">
+                <h3>Professor/Academic Researcher</h3>
+                <p>Teach at universities, conduct research, publish papers, and mentor students in your field of expertise.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Research Scientist</h3>
+                <p>Conduct research in industry, government, or non-profit organizations to develop new products, technologies, or knowledge.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Data Scientist</h3>
+                <p>Apply statistical and computational methods to analyze complex data and extract insights for decision-making.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Consultant</h3>
+                <p>Provide expert advice to organizations in your field of specialization, helping them solve complex problems.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Science Policy Advisor</h3>
+                <p>Work with government agencies to develop policies based on scientific evidence and research findings.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Research and Development Manager</h3>
+                <p>Lead research teams in industry to develop new products, technologies, or processes.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="education-section">
+        <h2>Further Development Options</h2>
+        <p>After completing your PhD, you might consider pursuing:</p>
+        
+        <ul class="education-list">
+            <li>Post-Doctoral Research Fellowships</li>
+            <li>Industry-specific certifications</li>
+            <li>Executive education programs</li>
+            <li>Entrepreneurship and startup incubators</li>
+        </ul>
+    </div>
+    
+    <div class="colleges-section">
+        <h2>Top Universities and Research Institutions for PhD Programs</h2>
+        <p>Here are some renowned institutions where you can pursue a PhD or post-doctoral research:</p>
+        
+        <div class="college-grid">
+            <div class="college-card">
+                <h3>Indian Institute of Science (IISc), Bangalore</h3>
+                <p>Offers PhD programs across various scientific disciplines with world-class research facilities.</p>
+                <div class="college-card-footer">
+                    <a href="https://www.iisc.ac.in/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+            
+            <div class="college-card">
+                <h3>Tata Institute of Fundamental Research (TIFR)</h3>
+                <p>Known for excellent PhD programs in physics, mathematics, computer science, and biological sciences.</p>
+                <div class="college-card-footer">
+                    <a href="https://www.tifr.res.in/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+            
+            <div class="college-card">
+                <h3>Indian Institutes of Technology (IITs)</h3>
+                <p>Offers PhD programs in engineering, sciences, humanities, and management with strong research focus.</p>
+                <div class="college-card-footer">
+                    <a href="https://www.iitsystem.ac.in/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+
+            <div class="college-card">
+                <h3>Council of Scientific and Industrial Research (CSIR) Labs</h3>
+                <p>Network of research laboratories offering PhD and post-doctoral research opportunities across India.</p>
+                <div class="college-card-footer">
+                    <a href="https://www.csir.res.in/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include the reviews section -->
+    {% include 'reviews_section.html' %}
+</div>
+{% endblock %}

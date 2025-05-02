@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+
+{% block title %}Your Career Fit Results - CareerMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .results-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .results-header h2 {
+        color: #4285F4;
+        margin-bottom: 10px;
+    }
+    
+    .results-section {
+        margin-bottom: 40px;
+        padding: 25px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .results-section h3 {
+        color: #4285F4;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 10px;
+    }
+    
+    .career-match {
+        display: flex;
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .career-match:last-child {
+        border-bottom: none;
+    }
+    
+    .match-percentage {
+        flex: 0 0 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .percentage-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: conic-gradient(#4285F4 0% var(--percentage), #e9ecef var(--percentage) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin-bottom: 10px;
+    }
+    
+    .percentage-circle::before {
+        content: "";
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: white;
+    }
+    
+    .percentage-text {
+        position: relative;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #4285F4;
+    }
+    
+    .match-details {
+        flex: 1;
+        padding-left: 20px;
+    }
+    
+    .match-title {
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .match-category {
+        display: inline-block;
+        padding: 3px 10px;
+        background-color: #e9ecef;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        margin-bottom: 15px;
+    }
+    
+    .match-scores {
+        display: flex;
+        margin-bottom: 15px;
+    }
+    
+    .score-item {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        border-right: 1px solid #eee;
+    }
+    
+    .score-item:last-child {
+        border-right: none;
+    }
+    
+    .score-label {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .score-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #4285F4;
+    }
+    
+    .match-insights {
+        margin-top: 20px;
+    }
+    
+    .insights-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #555;
+    }
+    
+    .strengths-list, .gaps-list {
+        margin-bottom: 15px;
+    }
+    
+    .strength-item, .gap-item {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    
+    .strength-item {
+        background-color: rgba(40, 167, 69, 0.1);
+        border-left: 3px solid #28a745;
+    }
+    
+    .gap-item {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 3px solid #ffc107;
+    }
+    
+    .education-paths {
+        margin-top: 15px;
+    }
+    
+    .education-paths ul {
+        padding-left: 20px;
+    }
+    
+    .education-paths li {
+        margin-bottom: 5px;
+    }
+    
+    .personality-section {
+        margin-top: 40px;
+    }
+    
+    .trait-item {
+        margin-bottom: 20px;
+    }
+    
+    .trait-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    .trait-name {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .trait-score {
+        font-weight: bold;
+        color: #4285F4;
+    }
+    
+    .trait-bar {
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+    
+    .trait-fill {
+        height: 100%;
+        background-color: #4285F4;
+    }
+    
+    .trait-description {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .action-button {
+        padding: 10px 20px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+    
+    .primary-button {
+        background-color: #4285F4;
+        color: white;
+    }
+    
+    .primary-button:hover {
+        background-color: #3367d6;
+        color: white;
+    }
+    
+    .secondary-button {
+        background-color: #e9ecef;
+        color: #333;
+    }
+    
+    .secondary-button:hover {
+        background-color: #dee2e6;
+        color: #333;
+    }
+    
+    @media (max-width: 768px) {
+        .career-match {
+            flex-direction: column;
+        }
+        
+        .match-percentage {
+            margin-bottom: 20px;
+        }
+        
+        .match-details {
+            padding-left: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <div class="results-header">
+        <h2>Your Career Fit Results</h2>
+        <p>Based on your responses, we've analyzed your personality traits, skills, interests, and values to identify your best career matches.</p>
+        
+        {% if plan_type == "free" %}
+        <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #4285F4;">
+            <p><strong>You're using the Free Plan.</strong> Upgrade to Premium for more detailed insights, specific role matches, skill gap analysis, and a downloadable PDF report.</p>
+            <a href="{{ url_for('career_test_plans') }}" class="action-button primary-button" style="margin-top: 10px; display: inline-block;">Compare Plans</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="results-section">
+        <h3>Top Career Matches</h3>
+        
+        {% for career in results %}
+        <div class="career-match">
+            <div class="match-percentage">
+                <div class="percentage-circle" style="--percentage: {{ career.match_percentage }}%;">
+                    <span class="percentage-text">{{ career.match_percentage }}%</span>
+                </div>
+                <div>Match</div>
+            </div>
+            
+            <div class="match-details">
+                {% if plan_type == "free" and career.category_title %}
+                <div class="match-title">{{ career.category_title }}</div>
+                <div class="match-category">General Category</div>
+                {% else %}
+                <div class="match-title">{{ career.title }}</div>
+                <div class="match-category">{{ career.category|title }}</div>
+                {% endif %}
+                
+                {% if plan_type == "premium" %}
+                <div class="match-scores">
+                    <div class="score-item">
+                        <div class="score-label">Personality Fit</div>
+                        <div class="score-value">{{ career.trait_score }}%</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Skills Match</div>
+                        <div class="score-value">{{ career.skill_score }}%</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Values Alignment</div>
+                        <div class="score-value">{{ career.value_score }}%</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="match-insights">
+                    <div class="insights-title">Your Strengths for this Career</div>
+                    <div class="strengths-list">
+                        {% if career.strengths %}
+                            {% for strength in career.strengths %}
+                            <div class="strength-item">
+                                <strong>{{ strength.name|replace('_', ' ')|title }}:</strong> 
+                                {% if strength.type == 'traits' %}
+                                    You have a natural aptitude in this personality trait.
+                                {% elif strength.type == 'skills' %}
+                                    You already possess this important skill.
+                                {% elif strength.type == 'values' %}
+                                    Your values align well with this aspect of the career.
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            
+                            {% if plan_type == "free" and career.strengths|length == 1 %}
+                            <div style="margin-top: 10px; font-style: italic; color: #666;">
+                                <a href="{{ url_for('career_test_plans') }}">Upgrade to Premium</a> to see all your strengths for this career.
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <p>No specific strengths identified.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="insights-title">Areas for Development</div>
+                    <div class="gaps-list">
+                        {% if career.gaps %}
+                            {% for gap in career.gaps %}
+                            <div class="gap-item">
+                                <strong>{{ gap.name|replace('_', ' ')|title }}:</strong> 
+                                {% if plan_type == "premium" %}
+                                    {{ gap.improvement }}
+                                {% else %}
+                                    Improve this skill to better match this career path.
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            
+                            {% if plan_type == "free" and career.gaps|length == 1 %}
+                            <div style="margin-top: 10px; font-style: italic; color: #666;">
+                                <a href="{{ url_for('career_test_plans') }}">Upgrade to Premium</a> for personalized improvement suggestions.
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <p>No significant gaps identified.</p>
+                        {% endif %}
+                    </div>
+                    
+                    {% if plan_type == "premium" or career.education_paths %}
+                    <div class="education-paths">
+                        <div class="insights-title">Education & Training Paths</div>
+                        <ul>
+                            {% for path in career.education_paths %}
+                            <li>{{ path }}</li>
+                            {% endfor %}
+                        </ul>
+                        
+                        {% if plan_type == "free" and career.education_paths|length == 1 %}
+                        <div style="margin-top: 10px; font-style: italic; color: #666;">
+                            <a href="{{ url_for('career_test_plans') }}">Upgrade to Premium</a> to see all education and training options.
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% if plan_type == "free" and results|length == 2 %}
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+            <p><strong>Want to see more career matches?</strong></p>
+            <p>Premium users get detailed breakdowns of their top 10 career matches with specific roles, salary information, and personalized fit scores.</p>
+            <a href="{{ url_for('career_test_plans') }}" class="action-button primary-button" style="margin-top: 10px;">Upgrade to Premium</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="results-section personality-section">
+        <h3>Your Personality Profile</h3>
+        <p>Understanding your personality traits can help you identify environments where you'll thrive.</p>
+        
+        {% for trait in personality_insights %}
+        <div class="trait-item">
+            <div class="trait-header">
+                <div class="trait-name">{{ trait.trait|replace('_', ' ')|title }}</div>
+                <div class="trait-score">{{ trait.score }}%</div>
+            </div>
+            <div class="trait-bar">
+                <div class="trait-fill" style="width: {{ trait.score }}%;"></div>
+            </div>
+            <div class="trait-description">{{ trait.description }}</div>
+        </div>
+        {% endfor %}
+        
+        {% if plan_type == "free" and personality_insights|length == 3 %}
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+            <p><strong>Want a complete personality profile?</strong></p>
+            <p>Premium users get an in-depth MBTI-style or Big Five personality analysis with detailed strengths and weaknesses.</p>
+            <a href="{{ url_for('career_test_plans') }}" class="action-button primary-button" style="margin-top: 10px;">Upgrade to Premium</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if plan_type == "premium" and pdf_report_path %}
+    <div class="results-section">
+        <h3>PDF Report</h3>
+        <p>Your detailed career assessment report is ready for download. This report includes all your results, personality insights, and personalized recommendations.</p>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('download_report', result_id=results[0].id) }}" class="action-button primary-button">
+                <i class="fas fa-file-pdf" style="margin-right: 8px;"></i> Download PDF Report
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="action-buttons">
+        <a href="{{ url_for('career_test') }}" class="action-button secondary-button">Take Test Again</a>
+        <a href="{{ url_for('career_test_history') }}" class="action-button secondary-button">View Test History</a>
+        <a href="{{ url_for('profile') }}" class="action-button primary-button">Back to Profile</a>
+    </div>
+</div>
+{% endblock %}

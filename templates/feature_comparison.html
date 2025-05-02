@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}{{ comparison.feature_name }} Plans - CareerMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .plans-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .plans-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .plans-header h2 {
+        color: #4285F4;
+        margin-bottom: 15px;
+    }
+    
+    .plans-grid {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .plan-card {
+        flex: 1;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    
+    .free-plan .plan-header {
+        background-color: #5c6bc0;
+    }
+    
+    .premium-plan .plan-header {
+        background-color: #4285F4;
+    }
+    
+    .plan-header {
+        padding: 20px;
+        text-align: center;
+        color: white;
+    }
+    
+    .plan-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .plan-price {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .plan-price-period {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .plan-features {
+        padding: 30px 20px;
+        background-color: white;
+    }
+    
+    .feature-item {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .feature-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .feature-name {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .feature-value {
+        color: #666;
+    }
+    
+    .premium-plan .feature-value {
+        font-weight: 500;
+    }
+    
+    .plan-action {
+        padding: 20px;
+        text-align: center;
+        background-color: #f8f9fa;
+    }
+    
+    .plan-button {
+        display: inline-block;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .free-plan .plan-button {
+        background-color: #5c6bc0;
+        color: white;
+    }
+    
+    .premium-plan .plan-button {
+        background-color: #4285F4;
+        color: white;
+    }
+    
+    .free-plan .plan-button:hover {
+        background-color: #3f51b5;
+    }
+    
+    .premium-plan .plan-button:hover {
+        background-color: #3367d6;
+    }
+    
+    .current-plan {
+        display: inline-block;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: 500;
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .faq-section {
+        margin-top: 60px;
+    }
+    
+    .faq-section h3 {
+        color: #4285F4;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .faq-item {
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+    
+    .faq-question {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .faq-answer {
+        color: #666;
+    }
+    
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .action-button {
+        padding: 10px 20px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+    
+    .primary-button {
+        background-color: #4285F4;
+        color: white;
+    }
+    
+    .primary-button:hover {
+        background-color: #3367d6;
+        color: white;
+    }
+    
+    .secondary-button {
+        background-color: #e9ecef;
+        color: #333;
+    }
+    
+    .secondary-button:hover {
+        background-color: #dee2e6;
+        color: #333;
+    }
+    
+    @media (max-width: 768px) {
+        .plans-grid {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="plans-container">
+    <div class="plans-header">
+        <h2>{{ comparison.feature_name }} Plans</h2>
+        <p>Choose the plan that best fits your needs</p>
+    </div>
+    
+    <div class="plans-grid">
+        <!-- Free Plan -->
+        <div class="plan-card free-plan">
+            <div class="plan-header">
+                <div class="plan-name">{{ comparison.tiers[0].name }}</div>
+                <div class="plan-price">${{ comparison.tiers[0].price }}</div>
+                <div class="plan-price-period">forever</div>
+            </div>
+            
+            <div class="plan-features">
+                {% for feature in comparison.tiers[0].features %}
+                <div class="feature-item">
+                    <div class="feature-name">{{ feature.name }}</div>
+                    <div class="feature-value">{{ feature.value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="plan-action">
+                {% if user_tier == "free" %}
+                <div class="current-plan">Current Plan</div>
+                {% else %}
+                <a href="{{ url_for('downgrade_feature', feature_id=comparison.feature_id) }}" class="plan-button">Downgrade to Free</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Premium Plan -->
+        <div class="plan-card premium-plan">
+            <div class="plan-header">
+                <div class="plan-name">{{ comparison.tiers[1].name }}</div>
+                <div class="plan-price">${{ comparison.tiers[1].price }}</div>
+                <div class="plan-price-period">per month</div>
+            </div>
+            
+            <div class="plan-features">
+                {% for feature in comparison.tiers[1].features %}
+                <div class="feature-item">
+                    <div class="feature-name">{{ feature.name }}</div>
+                    <div class="feature-value">{{ feature.value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="plan-action">
+                {% if user_tier == "premium" %}
+                <div class="current-plan">Current Plan</div>
+                {% else %}
+                <a href="{{ url_for('purchase_feature_subscription', feature_id=comparison.feature_id) }}" class="plan-button">Upgrade to Premium</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if comparison.feature_id == "career_test" %}
+    <div class="faq-section">
+        <h3>Frequently Asked Questions</h3>
+        
+        <div class="faq-item">
+            <div class="faq-question">What's the difference between the Free and Premium Career Test?</div>
+            <div class="faq-answer">
+                The Free test provides a basic assessment with fewer questions and general career suggestions. 
+                The Premium test offers a comprehensive assessment with more questions, detailed career matches, 
+                in-depth personality analysis, specific role suggestions with salary information, personalized 
+                skill gap analysis, progress tracking, and a downloadable PDF report.
+            </div>
+        </div>
+        
+        <div class="faq-item">
+            <div class="faq-question">Can I upgrade to Premium after taking the Free test?</div>
+            <div class="faq-answer">
+                Yes! You can upgrade to Premium at any time. Your previous test results will be preserved, 
+                and you'll gain access to all Premium features, including more detailed insights from your 
+                existing test results and the ability to take the full comprehensive assessment.
+            </div>
+        </div>
+        
+        <div class="faq-item">
+            <div class="faq-question">How often can I take the test?</div>
+            <div class="faq-answer">
+                You can take the test as many times as you like. Free users can take the basic test anytime, 
+                while Premium users can take the comprehensive test and track their progress over time to see 
+                how their career fit evolves as they develop new skills and interests.
+            </div>
+        </div>
+        
+        <div class="faq-item">
+            <div class="faq-question">What's included in the PDF report?</div>
+            <div class="faq-answer">
+                The Premium PDF report includes your complete personality profile, detailed career matches with 
+                percentage fits, skill gap analysis with improvement recommendations, education and training pathways, 
+                and personalized next steps for your career journey. It's professionally designed and can be used for 
+                college applications, job interviews, or career counseling sessions.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="action-buttons">
+        {% if comparison.feature_id == "career_test" %}
+        <a href="{{ url_for('career_test') }}" class="action-button primary-button">Take Career Test</a>
+        {% endif %}
+        <a href="{{ url_for('subscriptions') }}" class="action-button secondary-button">View All Subscriptions</a>
+        <a href="{{ url_for('profile') }}" class="action-button secondary-button">Back to Profile</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Career Tools - CareerMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tools-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .tools-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .tools-header h2 {
+        color: #4285F4;
+        margin-bottom: 15px;
+    }
+    
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .tool-card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .tool-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    
+    .tool-header {
+        padding: 20px;
+        text-align: center;
+        color: white;
+        background-color: #4285F4;
+    }
+    
+    .tool-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .tool-description {
+        padding: 20px;
+        flex-grow: 1;
+    }
+    
+    .tool-description p {
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .tool-features {
+        margin-top: 15px;
+    }
+    
+    .tool-feature {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .tool-feature i {
+        color: #4285F4;
+        margin-right: 10px;
+    }
+    
+    .tool-action {
+        padding: 20px;
+        text-align: center;
+        background-color: #f8f9fa;
+    }
+    
+    .tool-button {
+        display: inline-block;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: 500;
+        text-decoration: none;
+        background-color: #4285F4;
+        color: white;
+        transition: background-color 0.3s;
+    }
+    
+    .tool-button:hover {
+        background-color: #3367d6;
+    }
+    
+    .coming-soon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #dc3545;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tools-container">
+    <div class="tools-header">
+        <h2>Career Tools</h2>
+        <p>Explore our tools designed to help you in your career journey</p>
+    </div>
+    
+    <div class="tools-grid">
+        <!-- Career Fit Test -->
+        <div class="tool-card">
+            <div class="tool-header">
+                <div class="tool-name">Career Fit Test</div>
+            </div>
+            
+            <div class="tool-description">
+                <p>Take our psychometric assessment to discover careers that match your personality, skills, and values.</p>
+                
+                <div style="margin: 15px 0; padding: 10px; background-color: #f8f9fa; border-radius: 8px;">
+                    <p><strong>Available in both Free and Premium versions:</strong></p>
+                    <ul style="margin-top: 5px; padding-left: 20px;">
+                        <li><strong>Free:</strong> Basic assessment with 20 questions and limited results</li>
+                        <li><strong>Premium:</strong> Comprehensive assessment with 60 questions, detailed analysis, and downloadable reports</li>
+                    </ul>
+                </div>
+                
+                <div class="tool-features">
+                    <div class="tool-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Personality assessment</span>
+                    </div>
+                    <div class="tool-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Career matches</span>
+                    </div>
+                    <div class="tool-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Skill gap analysis</span>
+                    </div>
+                </div>
+                
+                {% if session.get('top_career_match') %}
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <p><strong>Your Top Career Match:</strong> {{ session.get('top_career_match') }} ({{ session.get('top_career_percentage') }}% match)</p>
+                    <a href="{{ url_for('career_test_history') }}" class="btn btn-secondary btn-sm">View Test History</a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="tool-action">
+                <a href="{{ url_for('career_test') }}" class="tool-button">Take Career Fit Test</a>
+                <a href="{{ url_for('pricing') }}" style="display: block; margin-top: 10px; text-align: center; color: #4285F4;">Compare Free vs Premium</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

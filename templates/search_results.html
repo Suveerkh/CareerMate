@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - CareerMate{% endblock %}
+
+{% block content %}
+    
+<h1>Search Results for "{{ query }}"</h1>
+
+{% set total_results = career_results|length + degree_results|length %}
+{% if total_results > 0 %}
+    <p>Found {{ total_results }} result{% if total_results != 1 %}s{% endif %} matching your search.</p>
+    
+    {% if career_results %}
+    <h2>Career Results</h2>
+    <div class="career-grid">
+        {% for career in career_results %}
+        <div class="career-card">
+            <h3>{{ career.title }}</h3>
+            <p>Explore a career as a {{ career.title }} and discover the skills, education, and experience needed for success in this field.</p>
+            <div class="career-card-footer">
+                <a href="{{ url_for('career_path', career_id=career.id) }}" class="btn btn-primary">Learn More</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if degree_results %}
+    <h2>Degree Results</h2>
+    <div class="career-grid">
+        {% for degree in degree_results %}
+        <div class="career-card">
+            <h3>{{ degree.title }}</h3>
+            <p>{{ degree.level_name }}{% if degree.stream_name %} in {{ degree.stream_name }}{% endif %}</p>
+            <div class="career-card-footer">
+                {% if degree.level == 'students' %}
+                <a href="{{ url_for('careers') }}?level={{ degree.level }}&stream={{ degree.stream }}&course={{ degree.id }}" class="btn btn-primary">Learn More</a>
+                {% else %}
+                <a href="{{ url_for('careers') }}?level={{ degree.level }}&course={{ degree.id }}" class="btn btn-primary">Learn More</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% else %}
+    <p>No results found for "{{ query }}". Please try a different search term.</p>
+    
+    <div style="margin-top: 2rem;">
+        <h2>Browse by Education Level</h2>
+        <div class="education-levels">
+            <div class="education-level">
+                <h3>Students</h3>
+                <ul>
+                    <li><a href="{{ url_for('careers') }}?level=students&stream=science&course=btech">B.Tech</a></li>
+                    <li><a href="{{ url_for('careers') }}?level=students&stream=science&course=bsc">B.Sc</a></li>
+                    <li><a href="{{ url_for('careers') }}?level=students&stream=commerce&course=bba">BBA</a></li>
+                    <li><a href="{{ url_for('careers') }}?level=students&stream=commerce&course=bcom">B.Com</a></li>
+                </ul>
+            </div>
+            <div class="education-level">
+                <h3>Graduates</h3>
+                <ul>
+                    <li><a href="{{ url_for('careers') }}?level=graduates&course=mba">MBA</a></li>
+                    <li><a href="{{ url_for('careers') }}?level=graduates&course=mca">MCA</a></li>
+                    <li><a href="{{ url_for('careers') }}?level=graduates&course=msc">M.Sc</a></li>
+                    <li><a href="{{ url_for('careers') }}?level=graduates&course=mcom">M.Com</a></li>
+                </ul>
+            </div>
+            <div class="education-level">
+                <h3>Post Graduates</h3>
+                <ul>
+                    <li><a href="{{ url_for('careers') }}?level=postgraduates&course=phd">PhD</a></li>
+                    <li><a href="{{ url_for('careers') }}?level=postgraduates&course=postdoc">Post-Doctoral</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

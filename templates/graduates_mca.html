@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Career Options for MCA Graduates - CareerMate{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <h1>Career Options for MCA Graduates</h1>
+    
+    <div class="career-section">
+        <h2>Information Technology Careers</h2>
+        <p>As an MCA graduate, you have a wide range of career options in the IT industry. Here are some popular career paths:</p>
+        
+        <div class="career-grid">
+            <div class="career-card">
+                <h3>Software Developer</h3>
+                <p>Design, develop, and maintain software applications. Write code, test software, and implement new features to meet user requirements and business needs.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Data Scientist</h3>
+                <p>Analyze large datasets to extract meaningful insights. Apply statistical methods, machine learning algorithms, and data visualization techniques to solve complex problems.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Systems Analyst</h3>
+                <p>Analyze and design information systems to meet organizational needs. Evaluate business requirements, recommend technology solutions, and oversee implementation.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Database Administrator</h3>
+                <p>Design, implement, and maintain databases. Ensure data security, optimize database performance, and develop backup and recovery procedures.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>IT Project Manager</h3>
+                <p>Plan, execute, and oversee IT projects. Manage resources, timelines, and budgets to ensure successful project completion and alignment with business goals.</p>
+            </div>
+            
+            <div class="career-card">
+                <h3>Cybersecurity Specialist</h3>
+                <p>Protect computer systems and networks from security breaches. Implement security measures, monitor for threats, and respond to security incidents.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="education-section">
+        <h2>Higher Education Options</h2>
+        <p>After completing your MCA, you might consider pursuing higher education:</p>
+        
+        <ul class="education-list">
+            <li>Ph.D in Computer Science or related fields</li>
+            <li>MBA with focus on IT management</li>
+            <li>Specialized certifications (AWS, Azure, CCNA, CompTIA, etc.)</li>
+            <li>Professional development courses in emerging technologies</li>
+        </ul>
+    </div>
+    
+    <div class="colleges-section">
+        <h2>Top Universities and Colleges for MCA Degree</h2>
+        <p>Here are some renowned colleges and universities where you can pursue an MCA degree:</p>
+        
+        <div class="college-grid">
+            <div class="college-card">
+                <h3>National Institute of Technology (NIT), Karnataka</h3>
+                <p>Offers a comprehensive MCA program with focus on advanced programming, software engineering, and emerging technologies.</p>
+                <div class="college-card-footer">
+                    <a href="https://www.nitk.ac.in/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+            
+            <div class="college-card">
+                <h3>R.V. College of Engineering, Bangalore</h3>
+                <p>Known for excellent MCA program with strong industry connections, modern computer labs, and experienced faculty.</p>
+                <div class="college-card-footer">
+                    <a href="https://www.rvce.edu.in/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+            
+            <div class="college-card">
+                <h3>Christ University, Bangalore</h3>
+                <p>Offers an MCA program with focus on practical skills, research, and holistic development of students.</p>
+                <div class="college-card-footer">
+                    <a href="https://christuniversity.in/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+            
+            <div class="college-card">
+                <h3>PES University, Bangalore</h3>
+                <p>Offers an industry-oriented MCA program with emphasis on cutting-edge technologies, research, and innovation.</p>
+                <div class="college-card-footer">
+                    <a href="https://www.pes.edu/" class="btn btn-secondary">Visit Website</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include the reviews section -->
+    {% include 'reviews_section.html' %}
+</div>
+{% endblock %}

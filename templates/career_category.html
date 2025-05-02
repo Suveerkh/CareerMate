@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} Careers - CareerMate</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('careers') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/career_mate - logo.png') }}" alt="CareerMate Logo" class="navbar-logo">
+            CareerMate
+        </a>
+        
+        <ul class="navbar-nav">
+            {% for cat_id, cat in CAREER_CATEGORIES.items() %}
+            <li class="nav-item career-dropdown">
+                <a href="{{ url_for('career_category', category_id=cat_id) }}" class="nav-link {% if cat_id == category_id %}active{% endif %}">{{ cat.name }}</a>
+                <div class="career-dropdown-content">
+                    {% for career in cat.careers %}
+                    <a href="{{ url_for('career_path', career_id=career.id) }}" class="dropdown-item">{{ career.title }}</a>
+                    {% endfor %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        <div style="display: flex; align-items: center;">
+            <form action="{{ url_for('search') }}" method="GET" class="search-container">
+                <input type="text" name="q" placeholder="Search careers..." class="search-input">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            
+            <div class="dropdown">
+                <div class="user-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}" class="dropdown-item">Profile</a>
+                    <a href="{{ url_for('edit_profile') }}" class="dropdown-item">Edit Profile</a>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="main-content">
+            <h1>{{ category.name }} Careers</h1>
+            
+            <p>Explore career options in the {{ category.name }} field for post-graduates. Click on a career to learn more about the requirements, salary expectations, and job outlook.</p>
+            
+            <div class="career-grid">
+                {% for career in category.careers %}
+                <div class="career-card">
+                    <h3>{{ career.title }}</h3>
+                    <p>Explore a career as a {{ career.title }} and discover the skills, education, and experience needed for success in this field.</p>
+                    <div class="career-card-footer">
+                        <a href="{{ url_for('career_path', career_id=career.id) }}" class="btn btn-primary">Learn More</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

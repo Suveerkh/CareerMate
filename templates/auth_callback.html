@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Authentication Callback{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Authentication in Progress</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Completing authentication...</p>
+                    </div>
+                    <div id="auth-message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// This script handles the OAuth callback from Supabase
+document.addEventListener('DOMContentLoaded', function() {
+    // Parse the URL hash fragment
+    const hashParams = {};
+    if (window.location.hash) {
+        window.location.hash.substring(1).split('&').forEach(function(item) {
+            const parts = item.split('=');
+            hashParams[parts[0]] = decodeURIComponent(parts[1]);
+        });
+    }
+    
+    // Check if we have the access_token and refresh_token
+    if (hashParams.access_token && hashParams.refresh_token) {
+        // We have the tokens, send them to the server
+        fetch('/auth/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                access_token: hashParams.access_token,
+                refresh_token: hashParams.refresh_token,
+                provider: 'google'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('auth-message').innerHTML = 
+                    '<div class="alert alert-success">Authentication successful! Redirecting...</div>';
+                window.location.href = data.redirect_url;
+            } else {
+                document.getElementById('auth-message').innerHTML = 
+                    '<div class="alert alert-danger">Authentication failed: ' + data.error + '</div>';
+            }
+        })
+        .catch(error => {
+            document.getElementById('auth-message').innerHTML = 
+                '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+        });
+    } else {
+        // No tokens found, check if we have an error
+        if (hashParams.error) {
+            document.getElementById('auth-message').innerHTML = 
+                '<div class="alert alert-danger">Authentication failed: ' + hashParams.error + '</div>';
+        } else {
+            // No tokens and no error, redirect to login
+            window.location.href = '/login';
+        }
+    }
+});
+</script>
+{% endblock %}

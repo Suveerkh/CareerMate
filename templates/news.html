@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}Education News - CareerMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .news-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .news-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .news-header h1 {
+        color: #4285f4;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .news-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .news-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+    }
+    
+    .news-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #fff;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    
+    .news-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .news-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+    
+    .news-content {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .news-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+        line-height: 1.4;
+    }
+    
+    .news-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .news-source {
+        font-size: 0.85rem;
+        color: #4285f4;
+    }
+    
+    .news-date {
+        font-size: 0.85rem;
+        color: #777;
+    }
+    
+    .news-description {
+        font-size: 0.95rem;
+        color: #555;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        flex-grow: 1;
+    }
+    
+    .news-link {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #4285f4;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+        text-align: center;
+        margin-top: auto;
+    }
+    
+    .news-link:hover {
+        background-color: #3367d6;
+    }
+    
+    .news-filters {
+        margin-bottom: 25px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .filter-button {
+        padding: 8px 15px;
+        background-color: #f1f1f1;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-button:hover, .filter-button.active {
+        background-color: #4285f4;
+        color: white;
+    }
+    
+    .last-updated {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #777;
+        margin-top: 30px;
+    }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 4px solid #4285f4;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    .category-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .category-tag {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        background-color: #f0f0f0;
+        color: #555;
+    }
+    
+    .category-tag.higher-education {
+        background-color: #e1f5fe;
+        color: #0277bd;
+    }
+    
+    .category-tag.technology {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+    
+    .category-tag.policy {
+        background-color: #fff3e0;
+        color: #e65100;
+    }
+    
+    .category-tag.career {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .search-bar {
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .search-input {
+        width: 100%;
+        max-width: 500px;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    .search-input:focus {
+        border-color: #4285f4;
+        box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+    }
+    
+    .no-news {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        color: #666;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+        .news-items {
+            grid-template-columns: 1fr;
+        }
+        
+        .news-header h1 {
+            font-size: 2rem;
+        }
+        
+        .news-filters {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .filter-button {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="news-container">
+    <div class="news-header">
+        <h1>Education News</h1>
+        <p>Stay updated with the latest news and trends in education and career development</p>
+    </div>
+    
+    <div class="search-bar">
+        <input type="text" id="news-search" class="search-input" placeholder="Search education news...">
+    </div>
+    
+    <div class="news-filters">
+        <button class="filter-button active" data-category="all">All News</button>
+        <button class="filter-button" data-category="higher-education">Higher Education</button>
+        <button class="filter-button" data-category="technology">EdTech</button>
+        <button class="filter-button" data-category="policy">Education Policy</button>
+        <button class="filter-button" data-category="career">Career Development</button>
+    </div>
+    
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading news...</p>
+    </div>
+    
+    <div class="news-items" id="news-container">
+        {% if news_items %}
+            {% for item in news_items %}
+                <div class="news-item" data-categories="{{ item.categories|join(' ') }}">
+                    {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="{{ item.title }}" class="news-image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/news-placeholder.jpg') }}" alt="News" class="news-image">
+                    {% endif %}
+                    <div class="news-content">
+                        <h3 class="news-title">{{ item.title }}</h3>
+                        
+                        <div class="news-meta">
+                            <div class="news-source">{{ item.source }}</div>
+                            <div class="news-date">{{ item.published_date }}</div>
+                        </div>
+                        
+                        {% if item.categories %}
+                        <div class="category-tags">
+                            {% for category in item.categories %}
+                                <span class="category-tag {{ category }}">
+                                    {% if category == 'higher-education' %}
+                                        Higher Education
+                                    {% elif category == 'technology' %}
+                                        EdTech
+                                    {% elif category == 'policy' %}
+                                        Policy
+                                    {% elif category == 'career' %}
+                                        Career
+                                    {% else %}
+                                        {{ category|capitalize }}
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <p class="news-description">{{ item.description }}</p>
+                        <a href="{{ item.url }}" target="_blank" class="news-link">Read More</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-news">
+                <p>No news articles available at the moment. Please check back later.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if last_updated %}
+        <div class="last-updated">
+            <p>Last updated: {{ last_updated }}</p>
+            <p>News articles are refreshed hourly and kept for 24 hours</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter functionality
+        const filterButtons = document.querySelectorAll('.filter-button');
+        const newsItems = document.querySelectorAll('.news-item');
+        const searchInput = document.getElementById('news-search');
+        
+        // Function to filter news items
+        function filterNewsItems() {
+            const activeCategory = document.querySelector('.filter-button.active').getAttribute('data-category');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            newsItems.forEach(item => {
+                const itemTitle = item.querySelector('.news-title').textContent.toLowerCase();
+                const itemDescription = item.querySelector('.news-description').textContent.toLowerCase();
+                const itemCategories = item.getAttribute('data-categories') || '';
+                
+                // Check if item matches category filter
+                const matchesCategory = activeCategory === 'all' || itemCategories.includes(activeCategory);
+                
+                // Check if item matches search term
+                const matchesSearch = searchTerm === '' || 
+                                     itemTitle.includes(searchTerm) || 
+                                     itemDescription.includes(searchTerm);
+                
+                // Show/hide based on both filters
+                if (matchesCategory && matchesSearch) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Check if any items are visible
+            const visibleItems = document.querySelectorAll('.news-item[style="display: block;"]');
+            const noNewsElement = document.querySelector('.no-news');
+            
+            if (visibleItems.length === 0) {
+                // If no items match, show "no results" message
+                if (!noNewsElement) {
+                    const newsContainer = document.getElementById('news-container');
+                    const noNewsDiv = document.createElement('div');
+                    noNewsDiv.className = 'no-news';
+                    noNewsDiv.innerHTML = '<p>No news articles match your search criteria.</p>';
+                    newsContainer.appendChild(noNewsDiv);
+                } else {
+                    noNewsElement.style.display = 'block';
+                }
+            } else if (noNewsElement) {
+                noNewsElement.style.display = 'none';
+            }
+        }
+        
+        // Category filter event listeners
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Apply filters
+                filterNewsItems();
+            });
+        });
+        
+        // Search input event listener
+        searchInput.addEventListener('input', filterNewsItems);
+        
+        // Initialize with default filters
+        filterNewsItems();
+    });
+</script>
+{% endblock %}

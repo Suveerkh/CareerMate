@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Your Profile - CareerMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .social-auth-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .btn-google, .btn-github {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        color: white;
+        font-weight: 500;
+        transition: background-color 0.3s;
+        width: fit-content;
+    }
+    
+    .btn-google {
+        background-color: #4285F4;
+    }
+    
+    .btn-github {
+        background-color: #24292e;
+    }
+    
+    .btn-google:hover {
+        background-color: #357ae8;
+    }
+    
+    .btn-github:hover {
+        background-color: #1a1e22;
+    }
+    
+    .btn-google img, .btn-github img {
+        margin-right: 10px;
+        width: 20px;
+        height: 20px;
+    }
+    
+    .auth-status {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    .auth-status.verified {
+        color: #28a745;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="profile-section">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h3>Welcome to CareerMate!</h3>
+        </div>
+        
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ username[0]|upper and not is_github_authenticated }}
+            </div>
+            <div class="profile-info">
+                <h2>{{ username }}</h2>
+                <p>{{ email }}</p>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+                <div class="social-auth-buttons">
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+                    <a href="{{ url_for('forgot_password') }}" class="btn btn-secondary">Change Password</a>
+                    <a href="{{ url_for('subscriptions') }}" class="btn btn-info">Manage Subscriptions</a>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
+    </div>
+    
+    <div class="profile-section">
+        <h3>Account Information</h3>
+        <div class="profile-info">
+            <p><strong>Username:</strong> {{ username }}</p>
+            <p><strong>Email:</strong> {{ email }}</p>
+            {% if current_status %}
+            <p><strong>Current Degree/Job:</strong> {{ current_status }}</p>
+            {% endif %}
+            <p><strong>Account Created:</strong> {% if created_at %}{{ created_at.strftime('%B %d, %Y') }}{% else %}Unknown{% endif %}</p>
+            
+            {% if not is_google_authenticated and not is_github_authenticated %}
+            <div class="auth-section">
+                <p><strong>Authentication:</strong> <span class="auth-status">Not verified</span></p>
+                <p>Verify your account with a social provider to access all features:</p>
+                <div class="social-auth-buttons">
+                    <a href="{{ url_for('verify_with_google') }}" class="btn-google">
+                        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
+                        Verify with Google
+                    </a>
+                    <a href="{{ url_for('verify_with_github') }}" class="btn-github">
+                        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub logo" style="width: 20px; height: 20px;">
+                        Verify with GitHub
+                    </a>
+                </div>
+            </div>
+            {% elif is_google_authenticated %}
+            <p><strong>Authentication:</strong> <span class="auth-status verified">Verified with Google</span></p>
+            {% elif is_github_authenticated %}
+            <p><strong>Authentication:</strong> <span class="auth-status verified">Verified with GitHub</span></p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="profile-section">
+        <h3>Career Resources</h3>
+        <p>This section contains career resources and tools to help you in your job search.</p>
+        
+        <p>Visit our <a href="{{ url_for('tools') }}">Tools</a> page to access our career tools and resources.</p>
+    </div>
+    
+    <div class="profile-section">
+        <h3>Recent Activity</h3>
+        {% if activities %}
+            <ul class="activity-list">
+                {% for activity in activities %}
+                    <li class="activity-item">
+                        <div class="activity-icon">
+                            {% if activity.activity_type == 'review' %}
+                                <i class="fas fa-star"></i>
+                            {% elif activity.activity_type == 'like' %}
+                                <i class="fas fa-thumbs-up"></i>
+                            {% else %}
+                                <i class="fas fa-check-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="activity-content">
+                            <p>{{ activity.content }}</p>
+                            <span class="activity-date">{{ activity.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No recent activity yet. Start exploring degrees and posting reviews!</p>
+        {% endif %}
+    </div>
+{% endblock %}

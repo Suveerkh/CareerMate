@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CareerMate{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/career_mate - logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('careers') if 'user_id' in session else url_for('home') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/career_mate - logo.png') }}" alt="CareerMate Logo" class="navbar-logo">
+            CareerMate
+        </a>
+        
+        {% if 'user_id' in session %}
+        <ul class="navbar-nav">
+            <!-- Students dropdown with nested options -->
+            <li class="nav-item career-dropdown">
+                <a href="#" class="nav-link">Students</a>
+                <div class="career-dropdown-content">
+                    <!-- Science option with nested dropdown -->
+                    <div class="nested-dropdown">
+                        <a href="#" class="dropdown-item">Science</a>
+                        <div class="nested-dropdown-content">
+                            <a href="{{ url_for('careers') }}?level=students&stream=science&course=btech" class="dropdown-item">B.Tech</a>
+                            <a href="{{ url_for('careers') }}?level=students&stream=science&course=bsc" class="dropdown-item">B.Sc</a>
+                        </div>
+                    </div>
+                    <!-- Commerce option with nested dropdown -->
+                    <div class="nested-dropdown">
+                        <a href="#" class="dropdown-item">Commerce</a>
+                        <div class="nested-dropdown-content">
+                            <a href="{{ url_for('careers') }}?level=students&stream=commerce&course=bba" class="dropdown-item">BBA</a>
+                            <a href="{{ url_for('careers') }}?level=students&stream=commerce&course=bcom" class="dropdown-item">B.Com</a>
+                        </div>
+                    </div>
+                    <!-- Arts option with nested dropdown -->
+                    <div class="nested-dropdown">
+                        <a href="#" class="dropdown-item">Arts</a>
+                        <div class="nested-dropdown-content">
+                            <a href="{{ url_for('careers') }}?level=students&stream=arts&course=ba" class="dropdown-item">B.A</a>
+                        </div>
+                    </div>
+                    <!-- Education option with nested dropdown -->
+                    <div class="nested-dropdown">
+                        <a href="#" class="dropdown-item">Education</a>
+                        <div class="nested-dropdown-content">
+                            <a href="{{ url_for('careers') }}?level=students&stream=education&course=bed" class="dropdown-item">B.Ed</a>
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+            
+            <!-- Graduates dropdown -->
+            <li class="nav-item career-dropdown">
+                <a href="{{ url_for('careers') }}?level=graduates" class="nav-link">Graduates</a>
+                <div class="career-dropdown-content">
+                    <!-- Science -->
+                    <a href="{{ url_for('careers') }}?level=graduates&course=msc" class="dropdown-item">M.Sc</a>
+                    <!-- Commerce -->
+                    <a href="{{ url_for('careers') }}?level=graduates&course=mcom" class="dropdown-item">M.Com</a>
+                    <!-- Arts -->
+                    <a href="{{ url_for('careers') }}?level=graduates&course=ma" class="dropdown-item">M.A</a>
+                    <!-- Management -->
+                    <a href="{{ url_for('careers') }}?level=graduates&course=mba" class="dropdown-item">MBA</a>
+                    <!-- Computer Applications -->
+                    <a href="{{ url_for('careers') }}?level=graduates&course=mca" class="dropdown-item">MCA</a>
+                </div>
+            </li>
+            
+            <!-- Post Graduates dropdown -->
+            <li class="nav-item career-dropdown">
+                <a href="{{ url_for('careers') }}?level=postgraduates" class="nav-link">Post Graduates</a>
+                <div class="career-dropdown-content">
+                    <a href="{{ url_for('careers') }}?level=postgraduates&course=phd" class="dropdown-item">PhD</a>
+                    <a href="{{ url_for('careers') }}?level=postgraduates&course=postdoc" class="dropdown-item">Post-Doctoral Research</a>
+                </div>
+            </li>
+            
+            <!-- News link -->
+            <li class="nav-item">
+                <a href="{{ url_for('news') }}" class="nav-link">Education News</a>
+            </li>
+            
+            <!-- Tools link -->
+            <li class="nav-item">
+                <a href="{{ url_for('tools') }}" class="nav-link">Tools</a>
+            </li>
+            
+            <!-- Pricing link -->
+            <li class="nav-item">
+                <a href="{{ url_for('pricing') }}" class="nav-link">Pricing</a>
+            </li>
+        </ul>
+        
+        <div style="display: flex; align-items: center;">
+            <form action="{{ url_for('search') }}" method="GET" class="search-container">
+                <input type="text" name="q" placeholder="Search careers..." class="search-input">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            
+            <div class="dropdown">
+                <div class="user-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}" class="dropdown-item">Profile</a>
+                    <a href="{{ url_for('edit_profile') }}" class="dropdown-item">Edit Profile</a>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="auth-links">
+            <a href="{{ url_for('signup') }}" class="nav-link">Sign Up</a>
+            <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+        </div>
+        {% endif %}
+    </nav>
+    
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>CareerMate</h3>
+                <p>Your career guidance companion</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="{{ url_for('careers') if 'user_id' in session else url_for('home') }}">Home</a></li>
+                    {% if 'user_id' in session %}
+                    <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                    <li><a href="{{ url_for('news') }}">Education News</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="{{ url_for('report_bugs') }}">Report Bugs</a></li>
+                    <li><a href="mailto:adhyottech@gmail.com">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {{ now.year if now else 2023 }} CareerMate. All rights reserved.</p>
+            <p>CareerMate is a part of Adhyot Tech</p>
+        </div>
+    </footer>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

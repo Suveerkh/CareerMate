@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Career Options - CareerMate{% endblock %}
+
+{% block content %}
+            {% if request.args.get('level') == 'students' and request.args.get('stream') == 'science' and request.args.get('course') == 'btech' %}
+                <h1>Explore Career Options for B.Tech Students</h1>
+            {% elif request.args.get('level') == 'students' and request.args.get('stream') == 'science' and request.args.get('course') == 'bsc' %}
+                <h1>Explore Career Options for B.Sc Students</h1>
+            {% elif request.args.get('level') == 'students' and request.args.get('stream') == 'commerce' and request.args.get('course') == 'bba' %}
+                <h1>Explore Career Options for BBA Students</h1>
+            {% elif request.args.get('level') == 'students' and request.args.get('stream') == 'commerce' and request.args.get('course') == 'bcom' %}
+                <h1>Explore Career Options for B.Com Students</h1>
+            {% elif request.args.get('level') == 'graduates' %}
+                {% if request.args.get('course') == 'mba' %}
+                    <h1>Explore Career Options for MBA Graduates</h1>
+                {% elif request.args.get('course') == 'mca' %}
+                    <h1>Explore Career Options for MCA Graduates</h1>
+                {% elif request.args.get('course') == 'msc' %}
+                    <h1>Explore Career Options for M.Sc Graduates</h1>
+                {% elif request.args.get('course') == 'mcom' %}
+                    <h1>Explore Career Options for M.Com Graduates</h1>
+                {% else %}
+                    <h1>Explore Career Options for Graduates</h1>
+                {% endif %}
+            {% elif request.args.get('level') == 'postgraduates' %}
+                {% if request.args.get('course') == 'phd' %}
+                    <h1>Explore Career Options for PhD Scholars</h1>
+                {% elif request.args.get('course') == 'postdoc' %}
+                    <h1>Explore Career Options for Post-Doctoral Researchers</h1>
+                {% else %}
+                    <h1>Explore Career Options for Post-Graduates</h1>
+                {% endif %}
+            {% else %}
+                <h1>Explore Career Options</h1>
+            {% endif %}
+            
+            {% if request.args.get('level') %}
+            <!-- Only show filters when a level is selected -->
+            <div class="filter-section">
+                <h3 class="filter-title">Filter Careers</h3>
+                
+                <div class="filter-group">
+                    <label>Categories:</label>
+                    <div class="filter-options">
+                        {% for category_id, category in categories.items() %}
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="category-{{ category_id }}" name="category" value="{{ category_id }}" checked>
+                            <label for="category-{{ category_id }}">{{ category.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Education Level:</label>
+                    <div class="filter-options">
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="level-students" name="level" value="students" 
+                                {{ 'checked' if request.args.get('level') == 'students' }}>
+                            <label for="level-students">Students</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="level-graduates" name="level" value="graduates"
+                                {{ 'checked' if request.args.get('level') == 'graduates' }}>
+                            <label for="level-graduates">Graduates</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="level-postgraduates" name="level" value="postgraduates" {{ 'checked' if request.args.get('level') == 'postgraduates' }}>
+                            <label for="level-postgraduates">Post Graduates</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Salary Range:</label>
+                    <div class="filter-options">
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="salary-1" name="salary" value="0-50000" checked>
+                            <label for="salary-1">$0 - $50,000</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="salary-2" name="salary" value="50000-100000" checked>
+                            <label for="salary-2">$50,000 - $100,000</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="salary-3" name="salary" value="100000+" checked>
+                            <label for="salary-3">$100,000+</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
+                
+                <!-- Back to all degrees button -->
+                <a href="{{ url_for('careers') }}" class="btn btn-secondary" style="margin-left: 10px;">
+                    Back to All Degrees
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if not request.args.get('level') %}
+            <!-- Display degree boxes when no level is selected -->
+            <div class="education-levels">
+                <h2>Choose Your Education Level</h2>
+                
+                <!-- Students Section -->
+                <div class="level-section">
+                    <h3>Students</h3>
+                    <div class="degree-grid">
+                        <!-- Science Stream -->
+                        <div class="stream-section">
+                            <h4>Science</h4>
+                            <div class="degree-boxes">
+                                <a href="{{ url_for('careers') }}?level=students&stream=science&course=btech" class="degree-box">
+                                    <h5>B.Tech</h5>
+                                    <p>Bachelor of Technology</p>
+                                </a>
+                                <a href="{{ url_for('careers') }}?level=students&stream=science&course=bsc" class="degree-box">
+                                    <h5>B.Sc</h5>
+                                    <p>Bachelor of Science</p>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Commerce Stream -->
+                        <div class="stream-section">
+                            <h4>Commerce</h4>
+                            <div class="degree-boxes">
+                                <a href="{{ url_for('careers') }}?level=students&stream=commerce&course=bba" class="degree-box">
+                                    <h5>BBA</h5>
+                                    <p>Bachelor of Business Administration</p>
+                                </a>
+                                <a href="{{ url_for('careers') }}?level=students&stream=commerce&course=bcom" class="degree-box">
+                                    <h5>B.Com</h5>
+                                    <p>Bachelor of Commerce</p>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Arts Stream -->
+                        <div class="stream-section">
+                            <h4>Arts</h4>
+                            <div class="degree-boxes">
+                                <a href="{{ url_for('careers') }}?level=students&stream=arts&course=ba" class="degree-box">
+                                    <h5>BA</h5>
+                                    <p>Bachelor of Arts</p>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Education Stream -->
+                        <div class="stream-section">
+                            <h4>Education</h4>
+                            <div class="degree-boxes">
+                                <a href="{{ url_for('careers') }}?level=students&stream=education&course=bed" class="degree-box">
+                                    <h5>B.Ed</h5>
+                                    <p>Bachelor of Education</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graduates Section -->
+                <div class="level-section">
+                    <h3>Graduates</h3>
+                    <div class="degree-grid">
+                        <div class="degree-boxes">
+                            <a href="{{ url_for('careers') }}?level=graduates&course=msc" class="degree-box">
+                                <h5>M.Sc</h5>
+                                <p>Master of Science</p>
+                            </a>
+                            <a href="{{ url_for('careers') }}?level=graduates&course=mcom" class="degree-box">
+                                <h5>M.Com</h5>
+                                <p>Master of Commerce</p>
+                            </a>
+                            <a href="{{ url_for('careers') }}?level=graduates&course=ma" class="degree-box">
+                                <h5>M.A</h5>
+                                <p>Master of Arts</p>
+                            </a>
+                            <a href="{{ url_for('careers') }}?level=graduates&course=mba" class="degree-box">
+                                <h5>MBA</h5>
+                                <p>Master of Business Administration</p>
+                            </a>
+                            <a href="{{ url_for('careers') }}?level=graduates&course=mca" class="degree-box">
+                                <h5>MCA</h5>
+                                <p>Master of Computer Applications</p>
+                            </a>
+                            <a href="{{ url_for('careers') }}?level=graduates&course=pgdm" class="degree-box">
+                                <h5>PGDM</h5>
+                                <p>Post Graduate Diploma in Management</p>
+                            </a>
+                            <a href="{{ url_for('careers') }}?level=graduates&course=med" class="degree-box">
+                                <h5>M.Ed</h5>
+                                <p>Master of Education</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Post Graduates Section -->
+                <div class="level-section">
+                    <h3>Post Graduates</h3>
+                    <div class="degree-grid">
+                        <div class="degree-boxes">
+                            <a href="{{ url_for('careers') }}?level=postgraduates&course=phd" class="degree-box">
+                                <h5>PhD</h5>
+                                <p>Doctor of Philosophy</p>
+                            </a>
+                            <a href="{{ url_for('careers') }}?level=postgraduates&course=postdoc" class="degree-box">
+                                <h5>Post-Doc</h5>
+                                <p>Post-Doctoral Research</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Display career options when a level is selected -->
+            <div id="career-results">
+                {% for category_id, category in categories.items() %}
+                <div class="category-section" data-category="{{ category_id }}">
+                    <h2>{{ category.name }}</h2>
+                    <div class="career-grid">
+                        {% for career in category.careers %}
+                        <div class="career-card" data-category="{{ category_id }}">
+                            <h3>{{ career.title }}</h3>
+                            <p>Explore a career as a {{ career.title }} and discover the skills, education, and experience needed for success in this field.</p>
+                            <div class="career-card-footer">
+                                <a href="{{ url_for('career_path', career_id=career.id) }}" class="btn btn-primary">Learn More</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        // Filter functionality
+        document.getElementById('apply-filters').addEventListener('click', function() {
+            const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            const selectedLevels = Array.from(document.querySelectorAll('input[name="level"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            const selectedSalaries = Array.from(document.querySelectorAll('input[name="salary"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            // Build query string for filtering
+            const params = new URLSearchParams(window.location.search);
+            
+            // Keep stream and course if they exist
+            const stream = params.get('stream');
+            const course = params.get('course');
+            
+            // Create new URL with selected filters
+            let url = new URL(window.location.href);
+            let newParams = new URLSearchParams();
+            
+            // Add level parameter (use the first selected level)
+            if (selectedLevels.length > 0) {
+                newParams.set('level', selectedLevels[0]);
+                
+                // Keep stream and course if they match the selected level
+                if (selectedLevels[0] === 'students' && stream) {
+                    newParams.set('stream', stream);
+                    if (course) newParams.set('course', course);
+                } else if (selectedLevels[0] === 'graduates' || selectedLevels[0] === 'postgraduates') {
+                    if (course) newParams.set('course', course);
+                }
+            }
+            
+            // Apply filters on the current page without reloading
+            document.querySelectorAll('.category-section').forEach(section => {
+                const categoryId = section.dataset.category;
+                if (selectedCategories.includes(categoryId)) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            
+            // Update URL without reloading the page
+            url.search = newParams.toString();
+            window.history.pushState({}, '', url);
+        });
+    </script>
+{% endblock %}
