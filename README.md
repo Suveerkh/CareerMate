@@ -2,32 +2,71 @@
 
 CareerMate is a career guidance platform that helps students and graduates explore career options based on their education level and interests.
 
-## Deployment on Render
+## Desktop Application
 
-This application is configured for deployment on Render.com.
+CareerMate is available as a desktop application for Windows, macOS, and Linux. The desktop app provides a seamless experience with automatic updates and offline capabilities.
 
-### Deployment Steps
+### Running the Desktop Application in Development Mode
 
-1. Create a new account on [Render](https://render.com/) if you don't have one already.
+1. Make sure you have Node.js and npm installed on your system.
 
-2. Connect your GitHub repository to Render:
-   - Go to the Render dashboard
-   - Click "New" and select "Blueprint"
-   - Connect your GitHub account and select your CareerMate repository
+2. Navigate to the desktop directory:
+   ```bash
+   cd desktop
+   ```
 
-3. Configure Environment Variables:
-   - SUPABASE_URL: Your Supabase project URL
-   - SUPABASE_KEY: Your Supabase API key
-   - MAIL_SERVER: SMTP server for sending emails (e.g., smtp.gmail.com)
-   - MAIL_PORT: SMTP port (e.g., 587)
-   - MAIL_USERNAME: Your email username
-   - MAIL_PASSWORD: Your email password or app password
-   - MAIL_DEFAULT_SENDER: Default sender email address
-   - SECRET_KEY: A secure random string for Flask sessions
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-4. Deploy:
-   - Render will automatically detect the render.yaml file and set up your service
-   - The deployment will start automatically
+4. Create application icons:
+   ```bash
+   ./create-icons.sh
+   ```
+
+5. Start the application:
+   ```bash
+   npm start
+   ```
+
+### Building the Desktop Application for Distribution
+
+#### For macOS:
+```bash
+cd desktop
+npm run package-mac
+```
+
+#### For Windows:
+```bash
+cd desktop
+npm run package-win
+```
+
+#### For Linux:
+```bash
+cd desktop
+npm run package-linux
+```
+
+The packaged applications will be available in the `dist` directory.
+
+### Publishing Updates
+
+When you want to release a new version with updates:
+
+1. Update your application code (Flask app, templates, etc.)
+
+2. Update the version number in `desktop/package.json`
+
+3. Build and publish the update:
+   ```bash
+   cd desktop
+   npm run publish
+   ```
+
+## Web Application Deployment
 
 ### Local Development
 

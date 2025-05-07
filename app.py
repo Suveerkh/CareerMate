@@ -46,6 +46,14 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HT
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_FILE_DIR'] = os.path.join(os.getcwd(), 'flask_session')
+app.config['SESSION_FILE_THRESHOLD'] = 500  # Maximum number of session files
+
+# Health check endpoint is defined later in the file
+app.config['SESSION_PERMANENT'] = True
+
+# Create session directory if it doesn't exist
+os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
 # Initialize Flask-Session
 Session(app)
@@ -63,12 +71,34 @@ def datetimeformat(value, format='%B %d, %Y'):
 # Initialize Supabase client as None, will be set up later
 app.supabase = None
 
-# Clean up expired state tokens periodically
+# Flag to track offline mode
+app.config['OFFLINE_MODE'] = False
+
+# Clean up expired state tokens periodically and check network
 @app.before_request
-def cleanup_before_request():
+def before_request_handler():
     # Only run cleanup occasionally to avoid overhead
     if random.random() < 0.1:  # 10% chance of running on each request
         cleanup_expired_states()
+    
+    # Skip network check for certain endpoints
+    if request.endpoint in ['health_check', 'network_status', 'static']:
+        return
+    
+    # Check internet connection for routes that require it
+    if request.endpoint in ['login', 'signup', 'verify_email', 'reset_password', 'careers']:
+        if not check_internet_connection():
+            app.config['OFFLINE_MODE'] = True
+            flash("No internet connection. Some features may not be available.", "warning")
+            
+            # For API endpoints, return a JSON response
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "error": "No internet connection",
+                    "message": "This feature requires an internet connection"
+                }), 503
+    else:
+        app.config['OFFLINE_MODE'] = False
 
 # Configure Flask-Mail
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
@@ -374,7 +404,7 @@ def signup():
                     session['email'] = email
                     
                     flash("Account created successfully! You can now use all features of CareerMate.", "success")
-                    return redirect(url_for("profile"))
+                    return redirect(url_for("careers"))
                 else:
                     print(f"Error in response: {response}")
                     flash("An error occurred during signup", "error")
@@ -461,7 +491,7 @@ def resend_verification():
 def login():
     # Check if user is already logged in
     if 'user_id' in session:
-        return redirect(url_for('profile'))
+        return redirect(url_for('careers'))
         
     if request.method == "POST":
         email = request.form["email"]
@@ -499,7 +529,7 @@ def login():
                         session['email'] = user.data[0]["email"]
                         
                         flash("Login successful!", "success")
-                        return redirect(url_for("profile"))  # Redirect to profile
+                        return redirect(url_for("careers"))  # Redirect to careers page
                     else:
                         flash("Invalid password", "error")
                 else:
@@ -1979,7 +2009,200 @@ if __name__ == "__main__":
             print(f"Error generating PDF report: {str(e)}")
             flash("An error occurred while generating your PDF report", "error")
             return redirect(url_for("career_test_history"))
+
+# Import network utilities
+from network_utils import check_internet_connection, is_supabase_reachable
+from functools import wraps
+from flask import make_response
+
+# Decorator to disable sessions for specific routes
+def no_session(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        response = make_response(f(*args, **kwargs))
+        # Tell Flask-Session not to set a cookie for this response
+        response.headers['X-Session-Disabled'] = 'true'
+        return response
+    return wrapped
+
+# Health check endpoint for desktop app - no session handling
+@app.route('/health', methods=["GET"])
+@no_session  # Use the no_session decorator to disable session handling
+def health_check():
+    """
+    Simple health check endpoint that doesn't use sessions to avoid cookie issues.
+    This is used by the desktop app to verify the server is running.
+    """
+    # Create a basic response without using the session
+    data = {
+        "status": "ok",
+        "message": "Server is running",
+        "timestamp": datetime.datetime.now().isoformat()
+    }
+    
+    # Use jsonify which handles the response creation properly
+    response = jsonify(data)
+    
+    # Set no-cache headers to ensure fresh responses
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    return response
+
+@app.route('/desktop-login')
+@no_session  # Use the no_session decorator to disable session handling
+def desktop_login():
+    """
+    Simple login page for the desktop app that doesn't use sessions.
+    This is used as a starting point for the desktop app.
+    """
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CareerMate - Login</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .login-container {
+                background-color: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                width: 350px;
+            }
+            h1 {
+                text-align: center;
+                color: #4285f4;
+            }
+            .form-group {
+                margin-bottom: 15px;
+            }
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+            input[type="email"], input[type="password"] {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            button {
+                width: 100%;
+                padding: 10px;
+                background-color: #4285f4;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            button:hover {
+                background-color: #3367d6;
+            }
+            .links {
+                text-align: center;
+                margin-top: 15px;
+            }
+            .links a {
+                color: #4285f4;
+                text-decoration: none;
+                margin: 0 10px;
+            }
+            .links a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <h1>CareerMate</h1>
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Log In</button>
+                </div>
+            </form>
+            <div class="links">
+                <a href="/signup">Sign Up</a>
+                <a href="/forgot-password">Forgot Password?</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return html
+
+# Network status endpoint
+@app.route('/network-status')
+def network_status():
+    internet_connected = check_internet_connection()
+    return jsonify({
+        "internet_connected": internet_connected
+    }), 200
+
+# This health check endpoint was removed to fix the duplicate route issue
+# The other health_check endpoint at line ~2010 is being used instead
+
+if __name__ == "__main__":
+    import argparse
+    import logging
+    import sys
+    
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='CareerMate Flask Server')
+    parser.add_argument('--port', type=int, default=5001, help='Port to run the server on')
+    parser.add_argument('--debug', action='store_true', help='Run in debug mode')
+    args = parser.parse_args()
+    
+    # Initialize Supabase when running the app directly
+    try:
+        init_supabase()
+        logger.info("Supabase client initialized successfully")
+    except Exception as e:
+        logger.warning(f"Failed to initialize Supabase client: {str(e)}")
+        logger.warning("The application will continue, but database operations may fail")
+    
+    # Start the news updater in a background thread
+    try:
+        start_news_updater()
+        logger.info("News updater started in background thread")
+    except Exception as e:
+        logger.warning(f"Failed to start news updater: {str(e)}")
+        logger.warning("The application will continue, but news may not be updated automatically")
     
     # Only run the app directly when this file is executed directly (not imported)
-    port = int(os.environ.get("PORT", 5001))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    port = int(os.environ.get("PORT", args.port))
+    print(f"Starting server on port {port}")
+    
+    # Run the Flask app with better error handling
+    try:
+        app.run(host='0.0.0.0', port=port, debug=args.debug, threaded=True)
+    except Exception as e:
+        logger.error(f"Failed to start server: {str(e)}")
+        sys.exit(1)
