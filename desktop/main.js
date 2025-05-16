@@ -36,17 +36,14 @@ try {
 }
 
 // Set up server URLs
-// Use the actual CareerMate server URL from config
-let serverUrl = config.serverUrl;
-// Fallback URLs in case the main one doesn't work
-const remoteUrls = [
-  'https://careermate.com',
-  'https://www.careermate.com',
-  'https://app.careermate.com',
-  'https://careermate.herokuapp.com'
-];
-// Local server as last resort
+// Local server as primary option
 let localServerUrl = `http://localhost:${serverPort}`;
+// Use local server as the default
+let serverUrl = localServerUrl;
+// Fallback URLs in case the local one doesn't work
+const remoteUrls = [
+  'http://localhost:5001/careers'
+];
 let connectionCheckInterval;
 
 // Create application menu
@@ -235,7 +232,7 @@ function startPythonServer() {
   
   const options = {
     mode: 'text',
-    pythonPath: 'python', // Use system Python
+    pythonPath: 'python3', // Use system Python 3
     pythonOptions: ['-u'], // Unbuffered output
     scriptPath: appPath,
     args: ['--port', serverPort.toString()]
@@ -244,9 +241,9 @@ function startPythonServer() {
   console.log('Python options:', options);
   
   try {
-    console.log('Spawning Python process for test_server.py...');
+    console.log('Spawning Python process for app.py...');
     // Use PythonShell.spawn instead of run for better process control
-    pythonProcess = new PythonShell('test_server.py', options);
+    pythonProcess = new PythonShell('app.py', options);
     
     // Add command line argument for port
     if (options.args && options.args.includes('--port')) {
@@ -290,16 +287,16 @@ function startMainAppServer() {
   
   const options = {
     mode: 'text',
-    pythonPath: 'python', // Use system Python
+    pythonPath: 'python3', // Use system Python 3
     pythonOptions: ['-u'], // Unbuffered output
     scriptPath: appPath,
     args: ['--port', serverPort.toString()]
   };
   
   try {
-    console.log('Spawning Python process for test_server.py...');
+    console.log('Spawning Python process for app.py...');
     // Use PythonShell.spawn instead of run for better process control
-    pythonProcess = new PythonShell('test_server.py', options);
+    pythonProcess = new PythonShell('app.py', options);
     
     pythonProcess.on('message', function(message) {
       console.log('Main app server message:', message);
@@ -349,10 +346,46 @@ function stopPythonServer() {
 async function checkServerConnection() {
   console.log('Checking server connection...');
   
-  // Try the main server first
+  // Try the local server first
+  if (config.useLocalServer) {
+    try {
+      console.log(`Trying local server: ${localServerUrl}`);
+      const response = await axios.get(localServerUrl, { 
+        timeout: 5000,
+        validateStatus: function (status) {
+          // Accept any status code as a valid response
+          return status >= 200 && status < 600;
+        }
+      });
+      
+      console.log('Local server response:', response.status);
+      
+      // If we get any response, the server is reachable
+      console.log('Local server is running!');
+      
+      // Update the serverUrl to the local one
+      serverUrl = localServerUrl;
+      
+      if (!serverRunning) {
+        console.log('Transitioning from splash to local server...');
+        serverRunning = true;
+        
+        // Load the local server
+        mainWindow.loadURL('http://localhost:5001/careers');
+      }
+      return;
+    } catch (localError) {
+      console.error('Error connecting to local server:', localError.message);
+      console.log('Local server is not accessible, trying remote servers...');
+    }
+  } else {
+    console.log('Local server is disabled in configuration, trying remote servers...');
+  }
+  
+  // If local server failed or is disabled, try the main server
   try {
-    console.log(`Trying to connect to main server: ${serverUrl}`);
-    const response = await axios.get(serverUrl, { 
+    console.log(`Trying to connect to main server: ${config.serverUrl}`);
+    const response = await axios.get(config.serverUrl, { 
       timeout: 5000,
       validateStatus: function (status) {
         // Accept any status code as a valid response
@@ -364,12 +397,16 @@ async function checkServerConnection() {
     
     // If we get any response, the server is reachable
     console.log('Main server is accessible!');
+    
+    // Update serverUrl to the main one
+    serverUrl = config.serverUrl;
+    
     if (!serverRunning) {
       console.log('Transitioning from splash to main server...');
       serverRunning = true;
       
       // Load the main server URL
-      mainWindow.loadURL(serverUrl);
+      mainWindow.loadURL('http://localhost:5001/careers');
     }
     return;
   } catch (error) {
@@ -385,7 +422,7 @@ async function checkServerConnection() {
         serverRunning = true;
         
         // Try to load the main page anyway
-        mainWindow.loadURL(serverUrl);
+        mainWindow.loadURL(config.serverUrl);
       }
       return;
     }
@@ -445,31 +482,6 @@ async function checkServerConnection() {
     }
   }
   
-  // If all remote servers failed and local server is enabled, try it as a last resort
-  if (config.useLocalServer) {
-    try {
-      console.log(`Trying local server: ${localServerUrl}`);
-      const response = await axios.get(localServerUrl, { timeout: 2000 });
-      console.log('Local server response:', response.status);
-      
-      if (response.status === 200) {
-        console.log('Local server is running!');
-        if (!serverRunning) {
-          console.log('Transitioning from splash to local server...');
-          serverRunning = true;
-          
-          // Load the local server
-          mainWindow.loadURL(localServerUrl);
-        }
-        return;
-      }
-    } catch (localError) {
-      console.error('Error connecting to local server:', localError.message);
-    }
-  } else {
-    console.log('Local server is disabled in configuration');
-  }
-  
   // If all servers failed
   if (serverRunning) {
     console.log('All servers were running but now are down, showing offline screen');
@@ -498,275 +510,144 @@ async function checkInternetConnection() {
       'https://www.google.com',
       'https://www.cloudflare.com',
       'https://www.apple.com',
-      'https://www.microsoft.com',
-      'https://www.amazon.com'
+      'https://www.microsoft.com'
     ];
     
-    // Try each site until one succeeds
     for (const site of sites) {
       try {
         console.log(`Trying to connect to ${site}...`);
-        const response = await axios.get(site, { 
-          timeout: 5000,
-          validateStatus: function (status) {
-            // Accept any status code as a valid response
-            return status >= 200 && status < 600;
-          }
-        });
-        
-        if (response.status >= 200 && response.status < 600) {
+        const response = await axios.get(site, { timeout: 5000 });
+        if (response.status === 200) {
           console.log('Internet connection confirmed!');
-          // Internet is connected, continue loading
           return true;
         }
-      } catch (siteError) {
-        console.error(`Failed to connect to ${site}:`, siteError.message);
-        // Continue to the next site
+      } catch (error) {
+        console.error(`Error connecting to ${site}:`, error.message);
       }
     }
     
-    // If we get here, all sites failed
-    throw new Error('All connectivity checks failed');
-  } catch (error) {
-    console.error('Internet connection check failed:', error.message);
-    
-    // Don't block the app from starting, just log the error
-    // We'll still try to connect to our servers anyway
+    console.error('No internet connection available');
     return false;
-  }
-}
-
-// Check if user is authenticated
-async function checkAuthStatus() {
-  try {
-    // Try to access a protected endpoint that requires authentication
-    // We'll use the /careers endpoint which should redirect to login if not authenticated
-    console.log('Checking authentication status...');
-    
-    // First try to access the careers page
-    let careersUrl = `${serverUrl}/careers`;
-    console.log(`Trying to access: ${careersUrl}`);
-    
-    // Make a request with { withCredentials: true } to send cookies
-    const response = await axios.get(careersUrl, { 
-      withCredentials: true,
-      maxRedirects: 0,  // Don't follow redirects
-      validateStatus: status => status >= 200 && status < 600  // Accept any status code
-    });
-    
-    console.log('Auth check response:', response.status);
-    
-    if (response.status === 200) {
-      // User is authenticated, load the careers page
-      console.log('User is authenticated, loading careers page');
-      mainWindow.loadURL(careersUrl);
-    } else if (response.status === 302 || response.status === 303) {
-      // Redirect indicates user is not authenticated
-      console.log('Redirect detected, user is not authenticated');
-      mainWindow.loadURL(`${serverUrl}/login`);
-    } else {
-      // Some other status code, default to the main site
-      console.log('Unexpected status code, defaulting to main site');
-      mainWindow.loadURL(serverUrl);
-    }
   } catch (error) {
-    console.error('Error checking authentication:', error.message);
-    
-    // Try a different approach - just load the main URL and let the server handle redirection
-    console.log('Falling back to loading the main URL');
-    mainWindow.loadURL(serverUrl);
+    console.error('Error checking internet connection:', error);
+    return false;
   }
 }
 
 // Show error dialog
 function showErrorDialog(title, message) {
-  dialog.showErrorBox(title, message);
-}
-
-// Clear user session and redirect to login page
-function clearUserSession() {
   if (mainWindow) {
-    // Clear cookies and storage
-    const session = mainWindow.webContents.session;
-    
-    // Show a loading message
-    mainWindow.loadFile(path.join(__dirname, 'splash.html'));
-    
-    // Clear all cookies
-    session.clearStorageData({ storages: ['cookies'] })
-      .then(() => {
-        console.log('Cookies cleared successfully');
-        // Redirect to login page
-        mainWindow.loadURL(`${serverUrl}/login`);
-      })
-      .catch(error => {
-        console.error('Error clearing cookies:', error);
-        // Still try to redirect to login page
-        mainWindow.loadURL(`${serverUrl}/login`);
-      });
+    dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      title: title,
+      message: message,
+      buttons: ['OK']
+    });
+  } else {
+    console.error(`${title}: ${message}`);
   }
 }
 
-// Configure logging
-log.transports.file.level = 'info';
-autoUpdater.logger = log;
-
-// Auto-updater events
-autoUpdater.on('checking-for-update', () => {
-  log.info('Checking for update...');
-});
-
-autoUpdater.on('update-available', (info) => {
-  log.info('Update available:', info);
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Update Available',
-    message: `A new version (${info.version}) of CareerMate is available. It will be downloaded in the background.`,
-    buttons: ['OK']
-  });
-});
-
-autoUpdater.on('update-not-available', (info) => {
-  log.info('Update not available:', info);
-});
-
-autoUpdater.on('error', (err) => {
-  log.error('Error in auto-updater:', err);
-});
-
-autoUpdater.on('download-progress', (progressObj) => {
-  let logMessage = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}% (${progressObj.transferred}/${progressObj.total})`;
-  log.info(logMessage);
-  
-  if (mainWindow) {
-    mainWindow.webContents.send('update-progress', progressObj);
-  }
-});
-
-autoUpdater.on('update-downloaded', (info) => {
-  log.info('Update downloaded:', info);
-  
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Update Ready',
-    message: 'A new version has been downloaded. Restart the application to apply the updates.',
-    buttons: ['Restart', 'Later']
-  }).then((returnValue) => {
-    if (returnValue.response === 0) {
-      autoUpdater.quitAndInstall();
-    }
-  });
-});
-
-// Create application menu with update option
-function createMenu() {
-  const template = [
-    {
-      label: 'File',
-      submenu: [
-        {
-          label: 'Log Out',
-          click: () => {
-            clearUserSession();
-          }
-        },
-        { type: 'separator' },
-        { role: 'quit' }
-      ]
-    },
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        { role: 'reload' },
-        { role: 'forceReload' },
-        { role: 'toggleDevTools' },
-        { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
-        { type: 'separator' },
-        { role: 'togglefullscreen' }
-      ]
-    },
-    {
-      label: 'Help',
-      submenu: [
-        {
-          label: 'Check for Updates',
-          click: () => {
-            autoUpdater.checkForUpdatesAndNotify();
-          }
-        },
-        {
-          label: 'About CareerMate',
-          click: () => {
-            dialog.showMessageBox({
-              title: 'About CareerMate',
-              message: 'CareerMate Desktop App',
-              detail: `Version: ${app.getVersion()}\nDeveloped by: Adhyot Tech\nEmail: adhyottech@gmail.com`,
-              buttons: ['OK']
-            });
-          }
-        }
-      ]
-    }
-  ];
-  
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
-}
-
-// Create window when Electron is ready
-app.whenReady().then(() => {
+// Handle app ready event
+app.on('ready', () => {
   createWindow();
-  createMenu();
   
-  // Check for updates after app is ready (but not in development)
+  // Set up auto-updater
   if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify();
-    
-    // Check for updates every 6 hours
-    setInterval(() => {
-      autoUpdater.checkForUpdatesAndNotify();
-    }, 6 * 60 * 60 * 1000);
+    setupAutoUpdater();
   }
 });
+
+// Set up auto-updater
+function setupAutoUpdater() {
+  log.transports.file.level = 'info';
+  autoUpdater.logger = log;
+  
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for updates...');
+  });
+  
+  autoUpdater.on('update-available', (info) => {
+    console.log('Update available:', info);
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update Available',
+      message: `A new version (${info.version}) is available and will be downloaded in the background.`,
+      buttons: ['OK']
+    });
+  });
+  
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('No updates available:', info);
+  });
+  
+  autoUpdater.on('error', (err) => {
+    console.error('Error in auto-updater:', err);
+  });
+  
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log(`Download progress: ${progressObj.percent}%`);
+  });
+  
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded:', info);
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update Ready',
+      message: 'A new version has been downloaded. Restart the application to apply the updates.',
+      buttons: ['Restart', 'Later']
+    }).then((returnValue) => {
+      if (returnValue.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+  });
+  
+  // Check for updates
+  autoUpdater.checkForUpdatesAndNotify();
+}
 
 // Quit when all windows are closed
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit();
+  // On macOS it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 app.on('activate', function () {
-  if (mainWindow === null) createWindow();
+  // On macOS it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (mainWindow === null) {
+    createWindow();
+  }
 });
 
-// Clean up before quitting
-app.on('before-quit', () => {
-  stopPythonServer();
-});
-
-// Handle IPC messages from renderer
+// Handle IPC messages from renderer process
 ipcMain.on('restart-server', () => {
+  console.log('Received request to restart server');
   stopPythonServer();
   startPythonServer();
 });
 
 ipcMain.on('check-connection', () => {
-  checkInternetConnection();
+  console.log('Received request to check connection');
+  checkServerConnection();
 });
 
-ipcMain.on('check-for-updates', () => {
-  autoUpdater.checkForUpdatesAndNotify();
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+  log.error('Uncaught exception:', error);
+  
+  if (mainWindow) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      title: 'Application Error',
+      message: 'An unexpected error occurred.',
+      detail: error.toString(),
+      buttons: ['OK']
+    });
+  }
 });

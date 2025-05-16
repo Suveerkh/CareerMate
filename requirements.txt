@@ -6,5 +6,6 @@ itsdangerous==2.1.2
 flask-session==0.5.0
 requests==2.31.0
 gunicorn==21.2.0
+beautifulsoup4==4.12.2
 # Add any other dependencies your app might need
 # If you have custom modules, they should be included in your repository
