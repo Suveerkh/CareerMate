@@ -74,6 +74,8 @@ def before_request_handler():
     # Only run cleanup occasionally to avoid overhead
     if random.random() < 0.1:  # 10% chance of running on each request
         cleanup_expired_states()
+        if user_id is None:
+            g.user = None
     
     # Skip network check for certain endpoints
     if request.endpoint in ['health_check', 'network_status', 'static']:
