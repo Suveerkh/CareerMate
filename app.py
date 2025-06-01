@@ -31,6 +31,7 @@ from subscription_plans import (
     cancel_subscription, 
     get_user_active_subscriptions
 )
+from network_utils import check_internet_connection, is_supabase_reachable
 
 # Load environment variables from .env file
 load_dotenv()
@@ -2008,7 +2009,6 @@ if __name__ == "__main__":
             return redirect(url_for("career_test_history"))
 
 # Import network utilities
-from network_utils import check_internet_connection, is_supabase_reachable
 from functools import wraps
 from flask import make_response
 
