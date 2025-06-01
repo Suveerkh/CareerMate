@@ -1762,7 +1762,7 @@ if __name__ == "__main__":
         # Redirect to the feature comparison page for career test
         return redirect(url_for("compare_feature_tiers", feature_id="career_test"))
     
-    @app.route('/career_test')
+    @app.route('/career-test')
     @login_required
     def career_test():
         """
