@@ -15,7 +15,7 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from urllib.parse import urlencode
 
-from careermate.google_auth import start_google_login, handle_google_callback
+from google_auth import start_google_login, handle_google_callback
 from flask_session import Session
 from github_auth import start_github_login, handle_github_callback
 from state_storage import cleanup_expired_states
