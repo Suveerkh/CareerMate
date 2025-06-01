@@ -171,18 +171,11 @@
         <div class="footer-bottom">
             <p>&copy; {{ now.year if now else 2023 }} CareerMate. All rights reserved.</p>
             <p>CareerMate is a part of Adhyot Tech</p>
-        </div>
+        </div><a href="https://phantomofficial.gumroad.com/coffee" target="_blank" class="gumroad-donate-button">
+  Support me
+</a>
     </footer>
     
     {% block scripts %}{% endblock %}
 </body>
-<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-<script>
-  kofiWidgetOverlay.draw('phantomofficial', {
-    'type': 'floating-chat',
-    'floating-chat.donateButton.text': 'Support me',
-    'floating-chat.donateButton.background-color': '#00b9fe',
-    'floating-chat.donateButton.text-color': '#fff'
-  });
-</script>
 </html>
