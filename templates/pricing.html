@@ -282,7 +282,7 @@
                 {% if user_plan == "premium" %}
                 <div class="current-plan">Current Plan</div>
                 {% else %}
-                <a href="{{ url_for('purchase_feature_subscription', feature_id='career_test') }}" class="pricing-button">Upgrade to Premium</a>
+                <a href="{{ url_for('subscriptions', feature_id='career_test') }}" class="pricing-button">Upgrade to Premium</a>
                 {% endif %}
             </div>
         </div>
