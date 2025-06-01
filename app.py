@@ -38,7 +38,7 @@ load_dotenv()
 
 app = Flask(__name__)
 # Set a secret key for session management
-app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
+app.secret_key = str(os.getenv("SECRET_KEY", "dev_secret_key"))
 # Set session to be permanent and last for 30 days
 app.permanent_session_lifetime = datetime.timedelta(days=30)
 
