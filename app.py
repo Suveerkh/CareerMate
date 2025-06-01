@@ -14,8 +14,9 @@ from dotenv import load_dotenv
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from urllib.parse import urlencode
+
+from careermate.google_auth import start_google_login, handle_google_callback
 from flask_session import Session
-from simple_google_auth import start_google_login, handle_google_callback
 from github_auth import start_github_login, handle_github_callback
 from state_storage import cleanup_expired_states
 from news_fetcher import load_news_data, start_news_updater
@@ -40,23 +41,15 @@ app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
 # Set session to be permanent and last for 30 days
 app.permanent_session_lifetime = datetime.timedelta(days=30)
 
-# Configure session to be more secure and reliable
+# Configure session settings for better OAuth support
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
-app.config['SESSION_FILE_DIR'] = os.path.join(os.getcwd(), 'flask_session')
-app.config['SESSION_FILE_THRESHOLD'] = 500  # Maximum number of session files
-
-# Health check endpoint is defined later in the file
-app.config['SESSION_PERMANENT'] = True
-
-# Create session directory if it doesn't exist
-os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
+app.config['SESSION_KEY_PREFIX'] = 'careermate:'
 
 # Initialize Flask-Session
 Session(app)
+
 
 # Add a custom filter for datetime formatting
 @app.template_filter('datetimeformat')
@@ -1206,7 +1199,10 @@ def google_login():
     # Make init_supabase accessible to the google_auth module
     app.init_supabase = init_supabase
     
-    return start_google_login()
+    # Debug: Check session before starting OAuth
+    print(f"Session before Google OAuth: {dict(session)}")
+    
+    return start_google_login(app)
 
 @app.route("/auth/google/callback")
 def google_callback():
@@ -1218,6 +1214,7 @@ def google_callback():
     
     # Print debug information
     print(f"Callback received with args: {request.args}")
+    print(f"Session at callback: {dict(session)}")
     
     return handle_google_callback(app)
 
@@ -2024,143 +2021,6 @@ def no_session(f):
         response.headers['X-Session-Disabled'] = 'true'
         return response
     return wrapped
-
-# Health check endpoint for desktop app - no session handling
-@app.route('/health', methods=["GET"])
-@no_session  # Use the no_session decorator to disable session handling
-def health_check():
-    """
-    Simple health check endpoint that doesn't use sessions to avoid cookie issues.
-    This is used by the desktop app to verify the server is running.
-    """
-    # Create a basic response without using the session
-    data = {
-        "status": "ok",
-        "message": "Server is running",
-        "timestamp": datetime.datetime.now().isoformat()
-    }
-    
-    # Use jsonify which handles the response creation properly
-    response = jsonify(data)
-    
-    # Set no-cache headers to ensure fresh responses
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    
-    return response
-
-@app.route('/desktop-login')
-@no_session  # Use the no_session decorator to disable session handling
-def desktop_login():
-    """
-    Simple login page for the desktop app that doesn't use sessions.
-    This is used as a starting point for the desktop app.
-    """
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>CareerMate - Login</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f5f5f5;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-            }
-            .login-container {
-                background-color: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                width: 350px;
-            }
-            h1 {
-                text-align: center;
-                color: #4285f4;
-            }
-            .form-group {
-                margin-bottom: 15px;
-            }
-            label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
-            input[type="email"], input[type="password"] {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
-            }
-            button {
-                width: 100%;
-                padding: 10px;
-                background-color: #4285f4;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            button:hover {
-                background-color: #3367d6;
-            }
-            .links {
-                text-align: center;
-                margin-top: 15px;
-            }
-            .links a {
-                color: #4285f4;
-                text-decoration: none;
-                margin: 0 10px;
-            }
-            .links a:hover {
-                text-decoration: underline;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="login-container">
-            <h1>CareerMate</h1>
-            <form action="/login" method="post">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <button type="submit">Log In</button>
-                </div>
-            </form>
-            <div class="links">
-                <a href="/signup">Sign Up</a>
-                <a href="/forgot-password">Forgot Password?</a>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return html
-
-# Network status endpoint
-@app.route('/network-status')
-def network_status():
-    internet_connected = check_internet_connection()
-    return jsonify({
-        "internet_connected": internet_connected
-    }), 200
-
-# This health check endpoint was removed to fix the duplicate route issue
-# The other health_check endpoint at line ~2010 is being used instead
 
 if __name__ == "__main__":
     import argparse

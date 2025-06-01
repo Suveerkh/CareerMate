@@ -514,13 +514,14 @@ CAREER_PROFILES = {
     }
 }
 
+
 def get_test_questions(plan_type="free"):
     """
     Return test questions organized by category, limited by plan type
-    
+
     Args:
         plan_type: "free" or "premium"
-        
+
     Returns:
         Dictionary of questions by category
     """
@@ -529,21 +530,21 @@ def get_test_questions(plan_type="free"):
         question_limit = 60  # Premium users get all questions
     else:
         question_limit = 20  # Free users get limited questions
-    
+
     # Create a copy of the questions dictionary
     limited_questions = {}
-    
+
     # Track total questions added
     total_questions = 0
-    
+
     # Calculate questions per category
     categories = list(CAREER_TEST_QUESTIONS.keys())
     questions_per_category = question_limit // len(categories)
-    
+
     # Add questions from each category
     for category in categories:
         category_questions = CAREER_TEST_QUESTIONS[category]
-        
+
         # Limit questions for this category
         if plan_type == "premium":
             limited_questions[category] = category_questions
@@ -551,35 +552,36 @@ def get_test_questions(plan_type="free"):
             # For free plan, take a subset of questions
             limited_questions[category] = category_questions[:questions_per_category]
             total_questions += questions_per_category
-    
+
     return limited_questions
+
 
 def calculate_career_matches(answers, plan_type="free"):
     """
     Calculate career matches based on test answers
-    
+
     Args:
         answers: Dictionary of question IDs and their scores (1-5)
         plan_type: "free" or "premium"
-        
+
     Returns:
         List of career matches with scores and insights, limited by plan type
     """
     # Initialize trait scores
     trait_scores = {}
-    
+
     # Process answers to calculate trait scores
     for question_id, score in answers.items():
         # Normalize score to 0-1 range
         normalized_score = (int(score) - 1) / 4.0
-        
+
         # Find the question and its associated trait
         for category in CAREER_TEST_QUESTIONS:
             for question in CAREER_TEST_QUESTIONS[category]:
                 if question["id"] == question_id:
                     trait_type = None
                     trait_name = None
-                    
+
                     if category == "personality":
                         trait_type = "traits"
                         trait_name = question["trait"]
@@ -592,25 +594,25 @@ def calculate_career_matches(answers, plan_type="free"):
                     elif category == "values":
                         trait_type = "values"
                         trait_name = question["value"]
-                    
+
                     if trait_type and trait_name:
                         if trait_type not in trait_scores:
                             trait_scores[trait_type] = {}
-                        
+
                         if trait_name not in trait_scores[trait_type]:
                             trait_scores[trait_type][trait_name] = []
-                        
+
                         trait_scores[trait_type][trait_name].append(normalized_score)
-    
+
     # Average the scores for each trait
     for trait_type in trait_scores:
         for trait_name in trait_scores[trait_type]:
             scores = trait_scores[trait_type][trait_name]
             trait_scores[trait_type][trait_name] = sum(scores) / len(scores)
-    
+
     # Calculate match scores for each career
     career_matches = []
-    
+
     for career_id, career in CAREER_PROFILES.items():
         # Initialize match components
         trait_match = 0
@@ -619,41 +621,41 @@ def calculate_career_matches(answers, plan_type="free"):
         skill_count = 0
         value_match = 0
         value_count = 0
-        
+
         # Calculate trait match
         if "traits" in trait_scores and "traits" in career:
             for trait, career_value in career["traits"].items():
                 if trait in trait_scores["traits"]:
                     trait_match += (1 - abs(career_value - trait_scores["traits"][trait])) * career_value
                     trait_count += career_value
-        
+
         # Calculate skill match
         if "skills" in trait_scores and "skills" in career:
             for skill, career_value in career["skills"].items():
                 if skill in trait_scores["skills"]:
                     skill_match += (1 - abs(career_value - trait_scores["skills"][skill])) * career_value
                     skill_count += career_value
-        
+
         # Calculate value match
         if "values" in trait_scores and "values" in career:
             for value, career_value in career["values"].items():
                 if value in trait_scores["values"]:
                     value_match += (1 - abs(career_value - trait_scores["values"][value])) * career_value
                     value_count += career_value
-        
+
         # Calculate overall match percentage
         trait_score = trait_match / trait_count if trait_count > 0 else 0
         skill_score = skill_match / skill_count if skill_count > 0 else 0
         value_score = value_match / value_count if value_count > 0 else 0
-        
+
         # Weight the components (can be adjusted)
         overall_match = (trait_score * 0.4) + (skill_score * 0.4) + (value_score * 0.2)
         match_percentage = round(overall_match * 100)
-        
+
         # Identify strengths and gaps
         strengths = []
         gaps = []
-        
+
         # Find top strengths
         for trait_type in ["traits", "skills", "values"]:
             if trait_type in trait_scores and trait_type in career:
@@ -666,7 +668,7 @@ def calculate_career_matches(answers, plan_type="free"):
                                 "name": item,
                                 "score": user_value
                             })
-        
+
         # Find top gaps
         for trait_type in ["traits", "skills", "values"]:
             if trait_type in trait_scores and trait_type in career:
@@ -679,14 +681,15 @@ def calculate_career_matches(answers, plan_type="free"):
                                 "name": item,
                                 "score": user_value,
                                 "target": career_value,
-                                "improvement": career["skill_gaps"].get(item, "Develop this skill through relevant courses and practice")
+                                "improvement": career["skill_gaps"].get(item,
+                                                                        "Develop this skill through relevant courses and practice")
                                 if trait_type == "skills" else "Focus on developing this area"
                             })
-        
+
         # Sort strengths and gaps
         strengths = sorted(strengths, key=lambda x: x["score"], reverse=True)[:3]
         gaps = sorted(gaps, key=lambda x: x["target"] - x["score"], reverse=True)[:3]
-        
+
         # Add career match to results
         career_matches.append({
             "id": career_id,
@@ -700,49 +703,50 @@ def calculate_career_matches(answers, plan_type="free"):
             "gaps": gaps,
             "education_paths": career["education_paths"]
         })
-    
+
     # Sort career matches by match percentage
     career_matches = sorted(career_matches, key=lambda x: x["match_percentage"], reverse=True)
-    
+
     # Limit results based on plan type
     if plan_type == "free":
         # Free plan gets limited career matches (top 2)
         career_matches = career_matches[:2]
-        
+
         # For free plan, simplify the career matches
         for match in career_matches:
             # Simplify the career title to a more general category
             match["category_title"] = match["category"].title()
-            
+
             # Limit strengths and gaps
             match["strengths"] = match["strengths"][:1] if match["strengths"] else []
             match["gaps"] = match["gaps"][:1] if match["gaps"] else []
-            
+
             # Simplify education paths
             match["education_paths"] = match["education_paths"][:1] if match["education_paths"] else []
     else:
         # Premium plan gets more detailed matches (top 10)
         career_matches = career_matches[:10]
-    
+
     return career_matches
+
 
 def save_test_results(user_id, answers, results, personality_insights=None, plan_type="free"):
     """
     Save test results to the database
-    
+
     Args:
         user_id: User ID
         answers: Dictionary of question IDs and their scores
         results: Career match results
         personality_insights: Personality insights from the test
         plan_type: "free" or "premium"
-        
+
     Returns:
         Result ID and result object
     """
     # Generate a unique ID for the test result
     result_id = str(uuid.uuid4())
-    
+
     # Create result object
     result = {
         "id": result_id,
@@ -753,39 +757,40 @@ def save_test_results(user_id, answers, results, personality_insights=None, plan
         "plan_type": plan_type,
         "created_at": str(datetime.datetime.now())
     }
-    
+
     return result_id, result
+
 
 def generate_pdf_report(user_data, test_results, personality_insights):
     """
     Generate a PDF report of career test results for premium users
-    
+
     Args:
         user_data: Dictionary with user information (name, email, etc.)
         test_results: Career match results
         personality_insights: Personality insights from the test
-        
+
     Returns:
         Path to the generated PDF file or None if there's an error
     """
     try:
         # This is a placeholder function that would use a PDF generation library
         # like ReportLab, WeasyPrint, or pdfkit to create a PDF report
-        
+
         # For demonstration purposes, we'll create a simple text file instead of a PDF
         # In a real implementation, this would generate and save a PDF file
-        
+
         import os
         from datetime import datetime
-        
+
         # Create a directory for reports if it doesn't exist
         reports_dir = os.path.join(os.getcwd(), "static", "reports")
         os.makedirs(reports_dir, exist_ok=True)
-        
+
         # Generate a unique filename
         report_id = str(uuid.uuid4())
         report_path = os.path.join(reports_dir, f"career_report_{report_id}.txt")
-        
+
         # Write the report content to a text file
         with open(report_path, "w") as f:
             f.write(f"CAREER FIT TEST REPORT\n")
@@ -793,59 +798,60 @@ def generate_pdf_report(user_data, test_results, personality_insights):
             f.write(f"Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}\n")
             f.write(f"For: {user_data.get('username', 'User')}\n")
             f.write(f"Email: {user_data.get('email', 'N/A')}\n\n")
-            
+
             f.write(f"TOP CAREER MATCHES\n")
             f.write(f"=================\n\n")
             for i, match in enumerate(test_results[:5], 1):
                 title = match.get("title", match.get("category_title", "Unknown"))
                 percentage = match.get("match_percentage", 0)
                 f.write(f"{i}. {title}: {percentage}% Match\n")
-            
+
             f.write(f"\nPERSONALITY INSIGHTS\n")
             f.write(f"===================\n\n")
             for trait, score in personality_insights.items():
                 f.write(f"{trait}: {score}\n")
-        
+
         return report_path
     except Exception as e:
         print(f"Error generating report: {str(e)}")
         return None
 
+
 def get_personality_insights(answers, plan_type="free"):
     """
     Generate personality insights based on test answers
-    
+
     Args:
         answers: Dictionary of question IDs and their scores
         plan_type: "free" or "premium"
-        
+
     Returns:
         Dictionary of personality insights, limited by plan type
     """
     # Initialize trait scores
     trait_scores = {}
-    
+
     # Process personality questions
     for question_id, score in answers.items():
         # Only process personality questions
         if question_id.startswith('p'):
             # Normalize score to 0-1 range
             normalized_score = (int(score) - 1) / 4.0
-            
+
             # Find the question and its associated trait
             for question in CAREER_TEST_QUESTIONS["personality"]:
                 if question["id"] == question_id:
                     trait = question["trait"]
-                    
+
                     if trait not in trait_scores:
                         trait_scores[trait] = []
-                    
+
                     trait_scores[trait].append(normalized_score)
-    
+
     # Average the scores for each trait
     for trait in trait_scores:
         trait_scores[trait] = sum(trait_scores[trait]) / len(trait_scores[trait])
-    
+
     # Define trait descriptions
     trait_descriptions = {
         "analytical": {
@@ -894,10 +900,10 @@ def get_personality_insights(answers, plan_type="free"):
             "low": "You may prefer quieter, less social environments. Consider developing communication skills for people-oriented roles."
         }
     }
-    
+
     # Generate insights
     insights = []
-    
+
     for trait, score in trait_scores.items():
         if trait in trait_descriptions:
             if score >= 0.7:
@@ -906,20 +912,20 @@ def get_personality_insights(answers, plan_type="free"):
                 level = "medium"
             else:
                 level = "low"
-            
+
             insights.append({
                 "trait": trait,
                 "score": round(score * 100),
                 "level": level,
                 "description": trait_descriptions[trait][level]
             })
-    
+
     # Sort insights by score
     insights = sorted(insights, key=lambda x: x["score"], reverse=True)
-    
+
     # Limit insights based on plan type
     if plan_type == "free":
         # Free plan gets limited insights (top 3)
         insights = insights[:3]
-    
+
     return insights
