@@ -1594,6 +1594,33 @@ def report_bugs():
     
     return redirect(mailto_link)
 
+@app.route('/subscriptions')
+@login_required
+def subscriptions():
+    user_subscription = None
+    if g.user:
+        try:
+            # Use the regular Supabase client (anon key) for SELECT as RLS is enabled
+            # and users can only view their own data.
+            response = supabase.from_('UserSubscriptions') \
+                               .select('*') \
+                               .eq('user_id', str(g.user.id)) \
+                               .single() \
+                               .execute()
+            if response.data:
+                user_subscription = response.data
+                # Format dates for display
+                if 'start_date' in user_subscription and user_subscription['start_date']:
+                    user_subscription['start_date_formatted'] = datetime.fromisoformat(user_subscription['start_date']).strftime('%Y-%m-%d %H:%M')
+                if 'end_date' in user_subscription and user_subscription['end_date']:
+                    user_subscription['end_date_formatted'] = datetime.fromisoformat(user_subscription['end_date']).strftime('%Y-%m-%d %H:%M')
+
+        except Exception as e:
+            logger.error(f"Error fetching user subscription for {g.user.id}: {e}")
+            flash("Could not retrieve your subscription details.", "danger")
+
+    return render_template('subscriptions.html', user_subscription=user_subscription)
+
 @app.route("/tools")
 @login_required
 def tools():
@@ -1641,7 +1668,7 @@ if __name__ == "__main__":
         user_subscriptions = get_user_subscriptions()
         
         return render_template(
-            "subscriptions.html",
+            "subscriptions_plans.html",
             active_subscriptions=active_subscriptions,
             available_features=FEATURES,
             user_subscriptions=user_subscriptions
