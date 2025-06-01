@@ -11,6 +11,15 @@ from flask import url_for, redirect, session, flash, request, jsonify
 from urllib.parse import urlencode
 from state_storage import save_state, verify_state
 
+def get_base_url():
+    """Get the base URL for the application (development or production)"""
+    if os.getenv('RENDER'):
+        # Running on Render
+        return f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', 'your-app-name.onrender.com')}"
+    else:
+        # Running locally
+        return "http://localhost:5001"
+
 def get_github_auth_url():
     """Generate a GitHub OAuth URL"""
     client_id = os.getenv("GITHUB_CLIENT_ID", "Ov23liWQZyjkDqbYLy8S")  # Use default value if env var not set
@@ -23,8 +32,8 @@ def get_github_auth_url():
     save_state(state)
     
     # Define the OAuth parameters
-    # Use a fixed redirect URI that matches what's registered in GitHub OAuth app settings
-    redirect_uri = "http://localhost:5001/auth/github/callback"
+    # Use dynamic redirect URI based on environment
+    redirect_uri = f"{get_base_url()}/auth/github/callback"
     print(f"Using redirect URI: {redirect_uri}")
     
     params = {
@@ -89,8 +98,8 @@ def handle_github_callback(app):
         client_secret = os.getenv("GITHUB_CLIENT_SECRET", "fb8537db166dc7ab394d8c37aa21e70c1311d1c8")
         
         token_url = "https://github.com/login/oauth/access_token"
-        # Use the same fixed redirect URI as in the authorization request
-        redirect_uri = "http://localhost:5001/auth/github/callback"
+        # Use the same redirect URI as in the authorization request
+        redirect_uri = f"{get_base_url()}/auth/github/callback"
         print(f"Using token exchange redirect URI: {redirect_uri}")
         
         token_data = {

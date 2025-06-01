@@ -10,7 +10,17 @@ from flask import url_for, redirect, session, flash, request
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport import requests as google_requests
+
 import pathlib
+
+def get_base_url():
+    """Get the base URL for the application (development or production)"""
+    if os.getenv('RENDER'):
+        # Running on Render
+        return f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', 'your-app-name.onrender.com')}"
+    else:
+        # Running locally
+        return "http://localhost:5001"
 
 def create_client_secrets_file():
     """Create a client_secrets.json file for Google OAuth if it doesn't exist"""
@@ -35,7 +45,9 @@ def create_client_secrets_file():
                 "client_secret": client_secret,
                 "redirect_uris": [
                     "http://localhost:5001/auth/google/callback",
-                    "http://127.0.0.1:5001/auth/google/callback"
+                    "http://127.0.0.1:5001/auth/google/callback",
+                    f"{get_base_url()}/auth/google/callback",
+                    f"{get_base_url()}/supabase/callback"
                 ]
             }
         }
@@ -76,7 +88,7 @@ def start_google_login(app):
         
         # Get the OAuth flow with the exact redirect URI that's registered in Google Cloud Console
         # Use the absolute URL with the correct host
-        redirect_uri = "http://localhost:5001/auth/google/callback"
+        redirect_uri = f"{get_base_url()}/auth/google/callback"
         flow = get_google_flow(redirect_uri)
         if not flow:
             flash("Google OAuth is not properly configured", "error")
@@ -131,7 +143,7 @@ def handle_google_callback(app):
             
         # Exchange the code for credentials
         # Use the exact same redirect URI as in the authorization request
-        redirect_uri = "http://localhost:5001/auth/google/callback"
+        redirect_uri = f"{get_base_url()}/auth/google/callback"
         flow = get_google_flow(redirect_uri)
         flow.fetch_token(code=code)
         
