@@ -1,6 +1,6 @@
 # app.py
 
-from flask import Flask, request, redirect, url_for, render_template, session, flash, jsonify
+from flask import Flask, request, redirect, url_for, render_template, session, flash, jsonify, g
 from supabase import create_client, Client
 import hashlib
 import os
@@ -1760,7 +1760,7 @@ if __name__ == "__main__":
         # Redirect to the feature comparison page for career test
         return redirect(url_for("compare_feature_tiers", feature_id="career_test"))
     
-    @app.route("/career-test")
+    @app.route("/career_test")
     @login_required
     def career_test():
         """
