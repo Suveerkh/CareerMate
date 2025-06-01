@@ -1,9 +1,9 @@
-flask==2.3.3
+Flask
 supabase==1.0.3
 python-dotenv==1.0.0
 flask-mail==0.9.1
-itsdangerous==2.1.2
-flask-session==0.5.0
+itsdangerous
+flask-session
 requests==2.31.0
 gunicorn==21.2.0
 beautifulsoup4==4.12.2
@@ -11,3 +11,4 @@ schedule==1.1.0
 google-auth==2.23.4
 google-auth-oauthlib==1.1.0
 google-auth-httplib2==0.1.1
+Werkzeug # Explicitly include Werkzeug to ensure it's upgraded if Flask's pin is removed
