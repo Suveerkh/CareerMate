@@ -1,5 +1,5 @@
 # app.py
-
+import supabase
 from flask import Flask, request, redirect, url_for, render_template, session, flash, jsonify, g
 from supabase import create_client, Client
 import hashlib
@@ -70,11 +70,11 @@ app.config['OFFLINE_MODE'] = False
 
 # Clean up expired state tokens periodically and check network
 @app.before_request
-def before_request_handler():
+def before_request_handler(user_id=None):
     # Only run cleanup occasionally to avoid overhead
     if random.random() < 0.1:  # 10% chance of running on each request
         cleanup_expired_states()
-        if user_id is None:
+    if user_id is None:
             g.user = None
     
     # Skip network check for certain endpoints
