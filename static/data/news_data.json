@@ -1,6 +1,40 @@
 {
-  "last_updated": "2025-06-02 18:47:02",
+  "last_updated": "2025-06-02 18:49:29",
   "articles": [
+    {
+      "title": "Catholic students find refuge at Princeton University's worship space and cheer new pope",
+      "description": "A group of young Catholics attend Mass every weekday at noon at the Princeton University Chapel",
+      "url": "https://abcnews.go.com/US/wireStory/catholic-students-find-refuge-princeton-universitys-worship-space-122392541",
+      "image_url": "https://i.abcnewsfe.com/a/f0bb8766-670f-46a6-87bb-b94f8cbc30ef/wirestory_528f011b0079228e43f27e180c1397ac_16x9.jpg?w=1600",
+      "source": "ABC News",
+      "published_date": "June 01, 2025",
+      "categories": [
+        "higher-education"
+      ],
+      "added_timestamp": 1748870369.79339
+    },
+    {
+      "title": "The WHO Keeps Failing Upward",
+      "description": "The phenomenon of failing upward is only too familiar among the ranks of Australian politicians. People from other countries also come readily to mind as examples, including former US President Joe Biden, British Prime Minister Sir Keir Starmer, and European …",
+      "url": "https://www.activistpost.com/the-who-keeps-failing-upward/",
+      "image_url": null,
+      "source": "Activistpost.com",
+      "published_date": "June 01, 2025",
+      "categories": [],
+      "added_timestamp": 1748870369.79339
+    },
+    {
+      "title": "Seán Doggett sets 400m record to take gold at Schools Track and Field Championships",
+      "description": "Belvedere College’s Cillian Doherty won the senior boys 100m event in 10.86",
+      "url": "https://www.irishtimes.com/sport/athletics/2025/06/01/sean-doggett-sets-400m-record-to-take-gold-at-schools-track-and-field-championships/",
+      "image_url": "https://www.irishtimes.com/resizer/v2/2MLAASZBPZG3JMXMORHXAHK24Q.jpg?smart=true&auth=86efcb81920f2ff052216fb89b980e39514bdb974c23b875afcd8fb2f11ccb0b&width=1200&height=630",
+      "source": "The Irish Times",
+      "published_date": "June 01, 2025",
+      "categories": [
+        "higher-education"
+      ],
+      "added_timestamp": 1748870369.79339
+    },
     {
       "title": "Podcast: Religious Law Schools, Rankings, And Bias",
       "description": "Following up on my previous post, Are Faith-Based Law Schools Fairly Ranked By U.S. News?: Anton Sorkin (Director of Law Student Ministries, Christian Legal Society), Religious Law Schools, Rankings, & Bias: With the release of U.S. News Rankings last month, …",
@@ -11,7 +45,49 @@
       "categories": [
         "policy"
       ],
-      "added_timestamp": 1748870222.999471
+      "added_timestamp": 1748870369.79339
+    },
+    {
+      "title": "Immigration Research Shows Stephen Miller Wrong About American Science",
+      "description": "Stephen Miller, the chief architect of Trump immigration policy, argues that American scientific achievement owes little to immigrants.",
+      "url": "https://www.forbes.com/sites/stuartanderson/2025/06/01/immigration-research-shows-stephen-miller-wrong-about-american-science/",
+      "image_url": "https://imageio.forbes.com/specials-images/imageserve/683bc0ef683f7eaf3460909b/0x0.jpg?format=jpg&crop=2798,1572,x0,y0,safe&height=900&width=1600&fit=bounds",
+      "source": "Forbes",
+      "published_date": "June 01, 2025",
+      "categories": [
+        "policy"
+      ],
+      "added_timestamp": 1748870369.79339
+    },
+    {
+      "title": "What We (Don't) Talk About When We Talk About AI in Education: A Posthumanist Response to Audrey Watters",
+      "description": "J. Owen Matson, \nIntralation: Culture, Theory, Pedagogy, \nJun 01, 2025\n\n\n \n \r\nOwen Matson offers this cogent critique of Audrey Watters, not from the perspective of a defense of AI, but by presenting Watters as a defender of a traditional humanist perspective…",
+      "url": "https://intralation-culture-theory-posthuman-pedagogy.ghost.io/what-we-dont-talk-about-when-we-talk-about-ai-in-education-a-posthumanist-response-to-audrey-watters/",
+      "image_url": "https://intralation-culture-theory-posthuman-pedagogy.ghost.io/content/images/2025/05/E36459A3-4B52-4D6B-B210-5707D2EB0FF7-1.png",
+      "source": "Ghost.io",
+      "published_date": "June 01, 2025",
+      "categories": [],
+      "added_timestamp": 1748870369.79339
+    },
+    {
+      "title": "Study Reveals What Grip Strength Means About Your Health",
+      "description": "New research suggests that grip strength is a good indicator of longevity. Experts explain how grip strength may indicate how long you’ll live.",
+      "url": "https://www.prevention.com/health/a64892526/grip-strength-longevity-study/",
+      "image_url": "https://hips.hearstapps.com/hmg-prod/images/hand-grips-to-strengthen-your-fingers-wrists-and-royalty-free-image-1748641986.pjpeg?crop=1.00xw:0.751xh;0,0.211xh&resize=1200:*",
+      "source": "Prevention.com",
+      "published_date": "June 01, 2025",
+      "categories": [],
+      "added_timestamp": 1748870369.79339
+    },
+    {
+      "title": "Elise Stefanik Calls for ‘Full Review’ of Political Bias in Taxpayer-Funded Truman Scholarships",
+      "description": "“one of the 2025 recipients of the Harry S. Truman Scholarship funded by American taxpayers is a pro-Hamas, antisemitic student”\nThe post Elise Stefanik Calls for ‘Full Review’ of Political Bias in Taxpayer-Funded Truman Scholarships first appeared on Le·gal …",
+      "url": "https://legalinsurrection.com/2025/06/elise-stefanik-calls-for-full-review-of-political-bias-in-taxpayer-funded-truman-scholarships/",
+      "image_url": "https://legalinsurrection.com/wp-content/uploads/2025/03/Elise-Stefanik.jpg",
+      "source": "Legalinsurrection.com",
+      "published_date": "June 01, 2025",
+      "categories": [],
+      "added_timestamp": 1748870369.79339
     },
     {
       "title": "USTM honours 2,000 career achievers as top recruiters line up on commendation day",
@@ -25,49 +101,7 @@
         "technology",
         "career"
       ],
-      "added_timestamp": 1748870222.999471
-    },
-    {
-      "title": "The WHO Keeps Failing Upward",
-      "description": "The phenomenon of failing upward is only too familiar among the ranks of Australian politicians. People from other countries also come readily to mind as examples, including former US President Joe Biden, British Prime Minister Sir Keir Starmer, and European …",
-      "url": "https://www.activistpost.com/the-who-keeps-failing-upward/",
-      "image_url": null,
-      "source": "Activistpost.com",
-      "published_date": "June 01, 2025",
-      "categories": [],
-      "added_timestamp": 1748870222.999471
-    },
-    {
-      "title": "Seán Doggett sets 400m record to take gold at Schools Track and Field Championships",
-      "description": "Belvedere College’s Cillian Doherty won the senior boys 100m event in 10.86",
-      "url": "https://www.irishtimes.com/sport/athletics/2025/06/01/sean-doggett-sets-400m-record-to-take-gold-at-schools-track-and-field-championships/",
-      "image_url": "https://www.irishtimes.com/resizer/v2/2MLAASZBPZG3JMXMORHXAHK24Q.jpg?smart=true&auth=86efcb81920f2ff052216fb89b980e39514bdb974c23b875afcd8fb2f11ccb0b&width=1200&height=630",
-      "source": "The Irish Times",
-      "published_date": "June 01, 2025",
-      "categories": [
-        "higher-education"
-      ],
-      "added_timestamp": 1748870222.999471
-    },
-    {
-      "title": "What We (Don't) Talk About When We Talk About AI in Education: A Posthumanist Response to Audrey Watters",
-      "description": "J. Owen Matson, \nIntralation: Culture, Theory, Pedagogy, \nJun 01, 2025\n\n\n \n \r\nOwen Matson offers this cogent critique of Audrey Watters, not from the perspective of a defense of AI, but by presenting Watters as a defender of a traditional humanist perspective…",
-      "url": "https://intralation-culture-theory-posthuman-pedagogy.ghost.io/what-we-dont-talk-about-when-we-talk-about-ai-in-education-a-posthumanist-response-to-audrey-watters/",
-      "image_url": "https://intralation-culture-theory-posthuman-pedagogy.ghost.io/content/images/2025/05/E36459A3-4B52-4D6B-B210-5707D2EB0FF7-1.png",
-      "source": "Ghost.io",
-      "published_date": "June 01, 2025",
-      "categories": [],
-      "added_timestamp": 1748870222.999471
-    },
-    {
-      "title": "Study Reveals What Grip Strength Means About Your Health",
-      "description": "New research suggests that grip strength is a good indicator of longevity. Experts explain how grip strength may indicate how long you’ll live.",
-      "url": "https://www.prevention.com/health/a64892526/grip-strength-longevity-study/",
-      "image_url": "https://hips.hearstapps.com/hmg-prod/images/hand-grips-to-strengthen-your-fingers-wrists-and-royalty-free-image-1748641986.pjpeg?crop=1.00xw:0.751xh;0,0.211xh&resize=1200:*",
-      "source": "Prevention.com",
-      "published_date": "June 01, 2025",
-      "categories": [],
-      "added_timestamp": 1748870222.999471
+      "added_timestamp": 1748870369.79339
     },
     {
       "title": "Experimenting with generative AI to kibbitz and futz towards more inclusive futures",
@@ -77,7 +111,7 @@
       "source": "The Conversation Africa",
       "published_date": "June 01, 2025",
       "categories": [],
-      "added_timestamp": 1748870222.999471
+      "added_timestamp": 1748870369.79339
     },
     {
       "title": "Arunachal CM Pema Khandu inaugurates new academic block, dining hall at Oju Mission School",
@@ -89,41 +123,7 @@
       "categories": [
         "higher-education"
       ],
-      "added_timestamp": 1748870222.999471
-    },
-    {
-      "title": "Immigration Research Shows Stephen Miller Wrong About American Science",
-      "description": "Stephen Miller, the chief architect of Trump immigration policy, argues that American scientific achievement owes little to immigrants.",
-      "url": "https://www.forbes.com/sites/stuartanderson/2025/06/01/immigration-research-shows-stephen-miller-wrong-about-american-science/",
-      "image_url": "https://imageio.forbes.com/specials-images/imageserve/683bc0ef683f7eaf3460909b/0x0.jpg?format=jpg&crop=2798,1572,x0,y0,safe&height=900&width=1600&fit=bounds",
-      "source": "Forbes",
-      "published_date": "June 01, 2025",
-      "categories": [
-        "policy"
-      ],
-      "added_timestamp": 1748870222.999471
-    },
-    {
-      "title": "Elise Stefanik Calls for ‘Full Review’ of Political Bias in Taxpayer-Funded Truman Scholarships",
-      "description": "“one of the 2025 recipients of the Harry S. Truman Scholarship funded by American taxpayers is a pro-Hamas, antisemitic student”\nThe post Elise Stefanik Calls for ‘Full Review’ of Political Bias in Taxpayer-Funded Truman Scholarships first appeared on Le·gal …",
-      "url": "https://legalinsurrection.com/2025/06/elise-stefanik-calls-for-full-review-of-political-bias-in-taxpayer-funded-truman-scholarships/",
-      "image_url": "https://legalinsurrection.com/wp-content/uploads/2025/03/Elise-Stefanik.jpg",
-      "source": "Legalinsurrection.com",
-      "published_date": "June 01, 2025",
-      "categories": [],
-      "added_timestamp": 1748870222.999471
-    },
-    {
-      "title": "Catholic students find refuge at Princeton University's worship space and cheer new pope",
-      "description": "A group of young Catholics attend Mass every weekday at noon at the Princeton University Chapel",
-      "url": "https://abcnews.go.com/US/wireStory/catholic-students-find-refuge-princeton-universitys-worship-space-122392541",
-      "image_url": "https://i.abcnewsfe.com/a/f0bb8766-670f-46a6-87bb-b94f8cbc30ef/wirestory_528f011b0079228e43f27e180c1397ac_16x9.jpg?w=1600",
-      "source": "ABC News",
-      "published_date": "June 01, 2025",
-      "categories": [
-        "higher-education"
-      ],
-      "added_timestamp": 1748870222.999471
+      "added_timestamp": 1748870369.79339
     }
   ]
 }

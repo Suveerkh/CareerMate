@@ -39,7 +39,6 @@ load_dotenv()
 app = Flask(__name__)
 # Set a secret key for session management
 app.secret_key = str(os.getenv("SECRET_KEY", "dev_secret_key"))
-app.config["SESSION_TYPE"] = "filesystem"
 # Set session to be permanent and last for 30 days
 app.permanent_session_lifetime = datetime.timedelta(days=30)
 
@@ -1747,7 +1746,7 @@ def pricing():
     # Career Test Routes
     @app.route("/career-test-plans")
     @login_required
-    def career_test_plans():
+    def career_fit_test_plans():
         """
         Display the career test plans comparison page
         """
@@ -1756,7 +1755,7 @@ def pricing():
     
     @app.route('/career-fit-test')
     @login_required
-    def career_test():
+    def career_fit_test():
         """
         Display the career fit test page
         """
