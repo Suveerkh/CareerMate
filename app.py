@@ -1639,364 +1639,214 @@ def pricing():
     
     return render_template("pricing.html", user_plan=user_plan)
 
-    # Subscription Management Routes
-    @app.route('/subscriptions')
-    @login_required
-    def subscriptions():
-        """
-        Display the user's subscriptions and available premium features
-        """
-        user_id = g.user.id if g.user else None  # Ensure user_id is available
+# Subscription Management Routes
+@app.route('/subscriptions')
+@login_required
+def subscriptions():
+    """
+    Display the user's subscriptions and available premium features
+    """
+    user_id = g.user.id if g.user else None  # Ensure user_id is available
 
-        # --- Logic from the first definition ---
-        user_subscription = None
-        if user_id:
-            try:
-                response = supabase.from_('UserSubscriptions') \
-                    .select('*') \
-                    .eq('user_id', str(user_id)) \
-                    .single() \
-                    .execute()
-                if response.data:
-                    user_subscription = response.data
-                    if 'start_date' in user_subscription and user_subscription['start_date']:
-                        user_subscription['start_date_formatted'] = datetime.fromisoformat(
-                            user_subscription['start_date']).strftime('%Y-%m-%d %H:%M')
-                    if 'end_date' in user_subscription and user_subscription['end_date']:
-                        user_subscription['end_date_formatted'] = datetime.fromisoformat(
-                            user_subscription['end_date']).strftime('%Y-%m-%d %H:%M')
-            except Exception as e:
-                logger.error(f"Error fetching user subscription for {user_id}: {e}")
-                flash("Could not retrieve your subscription details.", "danger")
+    # --- Logic from the first definition ---
+    user_subscription = None
+    if user_id:
+        try:
+            response = supabase.from_('UserSubscriptions') \
+                .select('*') \
+                .eq('user_id', str(user_id)) \
+                .single() \
+                .execute()
+            if response.data:
+                user_subscription = response.data
+                if 'start_date' in user_subscription and user_subscription['start_date']:
+                    user_subscription['start_date_formatted'] = datetime.fromisoformat(
+                        user_subscription['start_date']).strftime('%Y-%m-%d %H:%M')
+                if 'end_date' in user_subscription and user_subscription['end_date']:
+                    user_subscription['end_date_formatted'] = datetime.fromisoformat(
+                        user_subscription['end_date']).strftime('%Y-%m-%d %H:%M')
+        except Exception as e:
+            logger.error(f"Error fetching user subscription for {user_id}: {e}")
+            flash("Could not retrieve your subscription details.", "danger")
 
-        # --- Logic from the second definition ---
-        # Get user's active subscriptions
-        active_subscriptions = get_user_active_subscriptions()
+    # --- Logic from the second definition ---
+    # Get user's active subscriptions
+    active_subscriptions = get_user_active_subscriptions()
 
-        # Get user's subscriptions (for checking which features are already subscribed)
-        user_subscriptions = get_user_subscriptions()
+    # Get user's subscriptions (for checking which features are already subscribed)
+    user_subscriptions = get_user_subscriptions()
 
-        # --- Render the template, passing all necessary data ---
-        # You'll likely want to render 'subscriptions_plans.html' or combine content.
-        # If 'subscriptions.html' is meant for current status and 'subscriptions_plans.html' for management,
-        # you might need to decide which view is primary for /subscriptions, or redirect,
-        # or render based on query parameters.
-        # For simplicity, let's assume subscriptions_plans.html is the target:
-        return render_template(
-            "subscriptions_plans.html",
-            active_subscriptions=active_subscriptions,
-            available_features=FEATURES,  # Assuming FEATURES is defined elsewhere
-            user_subscriptions=user_subscriptions,
-            current_user_subscription_details=user_subscription  # Pass the first one's data too
-        )
-    
-    @app.route("/purchase/<feature_id>")
-    @login_required
-    def purchase_feature_subscription(feature_id):
-        """
-        Purchase a premium subscription for a specific feature
-        """
-        # Check if feature exists
-        if feature_id not in FEATURES:
-            flash("Feature not found", "error")
-            return redirect(url_for("subscriptions"))
-        
-        # Purchase the feature
-        result = purchase_feature(feature_id)
-        
-        if result["success"]:
-            flash(f"Congratulations! You've upgraded to {result['feature_name']} Premium.", "success")
-        else:
-            flash(f"Error: {result.get('message', 'An error occurred during purchase.')}", "error")
-        
-        # Redirect to the feature comparison page
-        return redirect(url_for("compare_feature_tiers", feature_id=feature_id))
-    
-    @app.route("/cancel/<feature_id>")
-    @login_required
-    def cancel_feature_subscription(feature_id):
-        """
-        Cancel a premium subscription for a specific feature
-        """
-        # Check if feature exists
-        if feature_id not in FEATURES:
-            flash("Feature not found", "error")
-            return redirect(url_for("subscriptions"))
-        
-        # Cancel the subscription
-        success = cancel_subscription(feature_id)
-        
-        if success:
-            flash(f"Your subscription to {FEATURES[feature_id]['name']} Premium has been canceled.", "success")
-        else:
-            flash("Error: You don't have an active subscription for this feature.", "error")
-        
-        # Redirect to the subscriptions page
+    # --- Render the template, passing all necessary data ---
+    # You'll likely want to render 'subscriptions_plans.html' or combine content.
+    # If 'subscriptions.html' is meant for current status and 'subscriptions_plans.html' for management,
+    # you might need to decide which view is primary for /subscriptions, or redirect,
+    # or render based on query parameters.
+    # For simplicity, let's assume subscriptions_plans.html is the target:
+    return render_template(
+        "subscriptions_plans.html",
+        active_subscriptions=active_subscriptions,
+        available_features=FEATURES,  # Assuming FEATURES is defined elsewhere
+        user_subscriptions=user_subscriptions,
+        current_user_subscription_details=user_subscription  # Pass the first one's data too
+    )
+
+@app.route("/purchase/<feature_id>")
+@login_required
+def purchase_feature_subscription(feature_id):
+    """
+    Purchase a premium subscription for a specific feature
+    """
+    # Check if feature exists
+    if feature_id not in FEATURES:
+        flash("Feature not found", "error")
         return redirect(url_for("subscriptions"))
     
-    @app.route("/downgrade/<feature_id>")
-    @login_required
-    def downgrade_feature(feature_id):
-        """
-        Downgrade a premium feature to the free tier
-        """
-        # Same as canceling
-        return cancel_feature_subscription(feature_id)
-        
-    # Career Test Routes
-    @app.route("/career-test-plans")
-    @login_required
-    def career_fit_test_plans():
-        """
-        Display the career test plans comparison page
-        """
-        # Redirect to the feature comparison page for career test
-        return redirect(url_for("compare_feature_tiers", feature_id="career_test"))
+    # Purchase the feature
+    result = purchase_feature(feature_id)
     
-    @app.route('/career-fit-test')
-    @login_required
-    def career_fit_test():
-        """
-        Display the career fit test page
-        """
-        # Get the user's tier for the career test feature
-        plan_type = get_feature_tier("career_test")
-        
-        # Get test questions based on plan type
-        questions = get_test_questions(plan_type)
-        
-        return render_template(
-            "career_test.html", 
-            questions=questions, 
-            plan_type=plan_type
-        )
+    if result["success"]:
+        flash(f"Congratulations! You've upgraded to {result['feature_name']} Premium.", "success")
+    else:
+        flash(f"Error: {result.get('message', 'An error occurred during purchase.')}", "error")
     
-    @app.route("/submit-career-test", methods=["POST"])
-    @login_required
-    def submit_career_test():
-        """
-        Process career test submission and show results
-        """
-        # Get user ID from session
-        user_id = session.get('user_id')
-        
-        if not user_id:
-            flash("You must be logged in to take the career test", "error")
-            return redirect(url_for("login"))
-        
-        # Get the user's tier for the career test feature
-        plan_type = get_feature_tier("career_test")
-        
-        # Get form data (answers to test questions)
-        answers = {}
-        for key, value in request.form.items():
-            # Only process question IDs (p1, p2, i1, etc.)
-            if key.startswith(('p', 'i', 's', 'v')) and len(key) <= 3:
-                answers[key] = value
-        
-        # Calculate career matches based on plan type
-        results = calculate_career_matches(answers, plan_type)
-        
-        # Get personality insights based on plan type
-        personality_insights = get_personality_insights(answers, plan_type)
-        
-        # Save test results to database
-        try:
-            # Initialize Supabase if not already done
-            init_supabase()
-            
-            # Save results
-            result_id, result_data = save_test_results(
-                user_id, 
-                answers, 
-                results, 
-                personality_insights, 
-                plan_type
-            )
-            
-            # Store in Supabase
-            app.supabase.table("CareerTestResults").insert({
-                "id": result_id,
-                "user_id": user_id,
-                "answers": json.dumps(answers),
-                "results": json.dumps(results),
-                "personality_insights": json.dumps(personality_insights),
-                "plan_type": plan_type,
-                "created_at": str(datetime.datetime.now())
-            }).execute()
-            
-            # Add to user activities
-            app.supabase.table("UserActivities").insert({
-                "id": str(uuid.uuid4()),
-                "user_id": user_id,
-                "activity_type": "career_test",
-                "content": f"Completed the Career Fit Test ({plan_type.title()} Plan)",
-                "created_at": str(datetime.datetime.now())
-            }).execute()
-            
-            # Store top result in session for easy access
-            if results and len(results) > 0:
-                session['top_career_match'] = results[0].get('title', results[0].get('category_title', 'Unknown'))
-                session['top_career_percentage'] = results[0]['match_percentage']
-            
-        except Exception as e:
-            print(f"Error saving test results: {str(e)}")
-            # Continue to show results even if saving fails
-        
-        # Generate PDF report for premium users
-        pdf_report_path = None
-        if plan_type == "premium" and check_feature_access("career_test", "downloadable_report"):
-            try:
-                # Get user data for the report
-                user_data = {
-                    "user_id": user_id,
-                    "username": session.get('username', 'User'),
-                    "email": session.get('email', '')
-                }
-                
-                # Generate the PDF report
-                pdf_report_path = generate_pdf_report(
-                    user_data, 
-                    results, 
-                    personality_insights
-                )
-            except Exception as e:
-                print(f"Error generating PDF report: {str(e)}")
-                # Continue without PDF if generation fails
-        
-        # Show results page
-        return render_template(
-            "career_test_results.html", 
-            results=results,
-            personality_insights=personality_insights,
-            plan_type=plan_type,
-            pdf_report_path=pdf_report_path
-        )
+    # Redirect to the feature comparison page
+    return redirect(url_for("compare_feature_tiers", feature_id=feature_id))
+
+@app.route("/cancel/<feature_id>")
+@login_required
+def cancel_feature_subscription(feature_id):
+    """
+    Cancel a premium subscription for a specific feature
+    """
+    # Check if feature exists
+    if feature_id not in FEATURES:
+        flash("Feature not found", "error")
+        return redirect(url_for("subscriptions"))
     
-    @app.route("/career-test-history")
-    @login_required
-    def career_test_history():
-        """
-        Show history of user's career test results
-        """
-        user_id = session.get('user_id')
-        
-        if not user_id:
-            flash("You must be logged in to view your test history", "error")
-            return redirect(url_for("login"))
-        
-        # Get the user's tier for the career test feature
-        plan_type = get_feature_tier("career_test")
-        
-        # Check if progress tracking is available
-        progress_tracking = check_feature_access("career_test", "progress_tracking")
-        
+    # Cancel the subscription
+    success = cancel_subscription(feature_id)
+    
+    if success:
+        flash(f"Your subscription to {FEATURES[feature_id]['name']} Premium has been canceled.", "success")
+    else:
+        flash("Error: You don't have an active subscription for this feature.", "error")
+    
+    # Redirect to the subscriptions page
+    return redirect(url_for("subscriptions"))
+
+@app.route("/downgrade/<feature_id>")
+@login_required
+def downgrade_feature(feature_id):
+    """
+    Downgrade a premium feature to the free tier
+    """
+    # Same as canceling
+    return cancel_feature_subscription(feature_id)
+
+# Career Test Routes
+@app.route("/career-test-plans")
+@login_required
+def career_fit_test_plans():
+    """
+    Display the career test plans comparison page
+    """
+    # Redirect to the feature comparison page for career test
+    return redirect(url_for("compare_feature_tiers", feature_id="career_test"))
+
+@app.route('/career-fit-test')
+@login_required
+def career_fit_test():
+    """
+    Display the career fit test page
+    """
+    # Get the user's tier for the career test feature
+    plan_type = get_feature_tier("career_test")
+    
+    # Get test questions based on plan type
+    questions = get_test_questions(plan_type)
+    
+    return render_template(
+        "career_test.html", 
+        questions=questions, 
+        plan_type=plan_type
+    )
+
+@app.route("/submit-career-test", methods=["POST"])
+@login_required
+def submit_career_test():
+    """
+    Process career test submission and show results
+    """
+    # Get user ID from session
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        flash("You must be logged in to take the career test", "error")
+        return redirect(url_for("login"))
+    
+    # Get the user's tier for the career test feature
+    plan_type = get_feature_tier("career_test")
+    
+    # Get form data (answers to test questions)
+    answers = {}
+    for key, value in request.form.items():
+        # Only process question IDs (p1, p2, i1, etc.)
+        if key.startswith(('p', 'i', 's', 'v')) and len(key) <= 3:
+            answers[key] = value
+    
+    # Calculate career matches based on plan type
+    results = calculate_career_matches(answers, plan_type)
+    
+    # Get personality insights based on plan type
+    personality_insights = get_personality_insights(answers, plan_type)
+    
+    # Save test results to database
+    try:
         # Initialize Supabase if not already done
         init_supabase()
         
-        # Get test history
+        # Save results
+        result_id, result_data = save_test_results(
+            user_id, 
+            answers, 
+            results, 
+            personality_insights, 
+            plan_type
+        )
+        
+        # Store in Supabase
+        app.supabase.table("CareerTestResults").insert({
+            "id": result_id,
+            "user_id": user_id,
+            "answers": json.dumps(answers),
+            "results": json.dumps(results),
+            "personality_insights": json.dumps(personality_insights),
+            "plan_type": plan_type,
+            "created_at": str(datetime.datetime.now())
+        }).execute()
+        
+        # Add to user activities
+        app.supabase.table("UserActivities").insert({
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "activity_type": "career_test",
+            "content": f"Completed the Career Fit Test ({plan_type.title()} Plan)",
+            "created_at": str(datetime.datetime.now())
+        }).execute()
+        
+        # Store top result in session for easy access
+        if results and len(results) > 0:
+            session['top_career_match'] = results[0].get('title', results[0].get('category_title', 'Unknown'))
+            session['top_career_percentage'] = results[0]['match_percentage']
+        
+    except Exception as e:
+        print(f"Error saving test results: {str(e)}")
+        # Continue to show results even if saving fails
+    
+    # Generate PDF report for premium users
+    pdf_report_path = None
+    if plan_type == "premium" and check_feature_access("career_test", "downloadable_report"):
         try:
-            # Initialize test_history as an empty list
-            test_history = []
-            
-            # Try to get results from Supabase
-            try:
-                results = app.supabase.table("CareerTestResults").select("*").filter("user_id", "eq", user_id).order("created_at", desc=True).execute()
-                
-                if results and hasattr(results, 'data') and results.data:
-                    for result in results.data:
-                        try:
-                            # Parse the results JSON
-                            parsed_results = []
-                            if result.get("results"):
-                                try:
-                                    parsed_results = json.loads(result.get("results", "[]"))
-                                except json.JSONDecodeError:
-                                    parsed_results = []
-                            
-                            top_matches = []
-                            
-                            if parsed_results and len(parsed_results) > 0:
-                                # Get top matches (limit based on plan)
-                                match_limit = 3 if plan_type == "premium" else 2
-                                for match in parsed_results[:match_limit]:
-                                    title = match.get("title", match.get("category_title", "Unknown"))
-                                    top_matches.append({
-                                        "title": title,
-                                        "match_percentage": match.get("match_percentage", 0)
-                                    })
-                            
-                            # Format the date
-                            try:
-                                if isinstance(result.get("created_at"), str):
-                                    created_at = datetime.datetime.fromisoformat(result["created_at"].replace('Z', '+00:00'))
-                                else:
-                                    created_at = result.get("created_at", datetime.datetime.now())
-                            except (ValueError, TypeError):
-                                created_at = datetime.datetime.now()
-                            
-                            # Get the test's plan type
-                            test_plan_type = result.get("plan_type", "free")
-                            
-                            test_history.append({
-                                "id": result.get("id"),
-                                "created_at": created_at,
-                                "top_matches": top_matches,
-                                "plan_type": test_plan_type
-                            })
-                        except Exception as item_error:
-                            print(f"Error processing test history item: {str(item_error)}")
-                            continue
-            except Exception as db_error:
-                print(f"Database error retrieving test history: {str(db_error)}")
-                # Continue with empty test_history
-            
-            # Render the template with whatever data we have
-            return render_template(
-                "career_test_history.html", 
-                test_history=test_history,
-                plan_type=plan_type,
-                progress_tracking=progress_tracking
-            )
-            
-        except Exception as e:
-            print(f"Error retrieving test history: {str(e)}")
-            flash("An error occurred while retrieving your test history", "error")
-            return redirect(url_for("profile"))
-            
-    @app.route("/download-report/<result_id>")
-    @login_required
-    def download_report(result_id):
-        """
-        Download a PDF report of a career test result (premium users only)
-        """
-        user_id = session.get('user_id')
-        
-        if not user_id:
-            flash("You must be logged in to download reports", "error")
-            return redirect(url_for("login"))
-        
-        # Check if user has premium access to downloadable reports
-        if not check_feature_access("career_test", "downloadable_report"):
-            flash("PDF reports are only available to Career Test Premium subscribers", "error")
-            return redirect(url_for("compare_feature_tiers", feature_id="career_test"))
-        
-        # Initialize Supabase if not already done
-        init_supabase()
-        
-        try:
-            # Get the test result
-            result = app.supabase.table("CareerTestResults").select("*").filter("id", "eq", result_id).filter("user_id", "eq", user_id).execute()
-            
-            if not result.data or len(result.data) == 0:
-                flash("Test result not found", "error")
-                return redirect(url_for("career_test_history"))
-            
-            # Parse the result data
-            test_data = result.data[0]
-            results = json.loads(test_data.get("results", "[]"))
-            personality_insights = json.loads(test_data.get("personality_insights", "[]"))
-            
             # Get user data for the report
             user_data = {
                 "user_id": user_id,
@@ -2010,23 +1860,173 @@ def pricing():
                 results, 
                 personality_insights
             )
-            
-            if pdf_report_path and os.path.exists(pdf_report_path):
-                # In a real implementation, this would return the PDF file
-                # For our implementation, we'll serve the text file
-                report_filename = os.path.basename(pdf_report_path)
-                report_url = url_for('static', filename=f'reports/{report_filename}')
-                
-                flash(f"Your report has been generated and is ready for download", "success")
-                return redirect(report_url)
-            else:
-                flash("An error occurred while generating your report", "error")
-                return redirect(url_for("career_test_history"))
-            
         except Exception as e:
             print(f"Error generating PDF report: {str(e)}")
-            flash("An error occurred while generating your PDF report", "error")
+            # Continue without PDF if generation fails
+    
+    # Show results page
+    return render_template(
+        "career_test_results.html", 
+        results=results,
+        personality_insights=personality_insights,
+        plan_type=plan_type,
+        pdf_report_path=pdf_report_path
+    )
+
+@app.route("/career-test-history")
+@login_required
+def career_test_history():
+    """
+    Show history of user's career test results
+    """
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        flash("You must be logged in to view your test history", "error")
+        return redirect(url_for("login"))
+    
+    # Get the user's tier for the career test feature
+    plan_type = get_feature_tier("career_test")
+    
+    # Check if progress tracking is available
+    progress_tracking = check_feature_access("career_test", "progress_tracking")
+    
+    # Initialize Supabase if not already done
+    init_supabase()
+    
+    # Get test history
+    try:
+        # Initialize test_history as an empty list
+        test_history = []
+        
+        # Try to get results from Supabase
+        try:
+            results = app.supabase.table("CareerTestResults").select("*").filter("user_id", "eq", user_id).order("created_at", desc=True).execute()
+            
+            if results and hasattr(results, 'data') and results.data:
+                for result in results.data:
+                    try:
+                        # Parse the results JSON
+                        parsed_results = []
+                        if result.get("results"):
+                            try:
+                                parsed_results = json.loads(result.get("results", "[]"))
+                            except json.JSONDecodeError:
+                                parsed_results = []
+                        
+                        top_matches = []
+                        
+                        if parsed_results and len(parsed_results) > 0:
+                            # Get top matches (limit based on plan)
+                            match_limit = 3 if plan_type == "premium" else 2
+                            for match in parsed_results[:match_limit]:
+                                title = match.get("title", match.get("category_title", "Unknown"))
+                                top_matches.append({
+                                    "title": title,
+                                    "match_percentage": match.get("match_percentage", 0)
+                                })
+                        
+                        # Format the date
+                        try:
+                            if isinstance(result.get("created_at"), str):
+                                created_at = datetime.datetime.fromisoformat(result["created_at"].replace('Z', '+00:00'))
+                            else:
+                                created_at = result.get("created_at", datetime.datetime.now())
+                        except (ValueError, TypeError):
+                            created_at = datetime.datetime.now()
+                        
+                        # Get the test's plan type
+                        test_plan_type = result.get("plan_type", "free")
+                        
+                        test_history.append({
+                            "id": result.get("id"),
+                            "created_at": created_at,
+                            "top_matches": top_matches,
+                            "plan_type": test_plan_type
+                        })
+                    except Exception as item_error:
+                        print(f"Error processing test history item: {str(item_error)}")
+                        continue
+        except Exception as db_error:
+            print(f"Database error retrieving test history: {str(db_error)}")
+            # Continue with empty test_history
+        
+        # Render the template with whatever data we have
+        return render_template(
+            "career_test_history.html", 
+            test_history=test_history,
+            plan_type=plan_type,
+            progress_tracking=progress_tracking
+        )
+        
+    except Exception as e:
+        print(f"Error retrieving test history: {str(e)}")
+        flash("An error occurred while retrieving your test history", "error")
+        return redirect(url_for("profile"))
+
+@app.route("/download-report/<result_id>")
+@login_required
+def download_report(result_id):
+    """
+    Download a PDF report of a career test result (premium users only)
+    """
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        flash("You must be logged in to download reports", "error")
+        return redirect(url_for("login"))
+    
+    # Check if user has premium access to downloadable reports
+    if not check_feature_access("career_test", "downloadable_report"):
+        flash("PDF reports are only available to Career Test Premium subscribers", "error")
+        return redirect(url_for("compare_feature_tiers", feature_id="career_test"))
+    
+    # Initialize Supabase if not already done
+    init_supabase()
+    
+    try:
+        # Get the test result
+        result = app.supabase.table("CareerTestResults").select("*").filter("id", "eq", result_id).filter("user_id", "eq", user_id).execute()
+        
+        if not result.data or len(result.data) == 0:
+            flash("Test result not found", "error")
             return redirect(url_for("career_test_history"))
+        
+        # Parse the result data
+        test_data = result.data[0]
+        results = json.loads(test_data.get("results", "[]"))
+        personality_insights = json.loads(test_data.get("personality_insights", "[]"))
+        
+        # Get user data for the report
+        user_data = {
+            "user_id": user_id,
+            "username": session.get('username', 'User'),
+            "email": session.get('email', '')
+        }
+        
+        # Generate the PDF report
+        pdf_report_path = generate_pdf_report(
+            user_data, 
+            results, 
+            personality_insights
+        )
+        
+        if pdf_report_path and os.path.exists(pdf_report_path):
+            # In a real implementation, this would return the PDF file
+            # For our implementation, we'll serve the text file
+            report_filename = os.path.basename(pdf_report_path)
+            report_url = url_for('static', filename=f'reports/{report_filename}')
+            
+            flash(f"Your report has been generated and is ready for download", "success")
+            return redirect(report_url)
+        else:
+            flash("An error occurred while generating your report", "error")
+            return redirect(url_for("career_test_history"))
+        
+    except Exception as e:
+        print(f"Error generating PDF report: {str(e)}")
+        flash("An error occurred while generating your PDF report", "error")
+        return redirect(url_for("career_test_history"))
 
 # Import network utilities
 from functools import wraps
