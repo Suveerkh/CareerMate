@@ -1657,46 +1657,54 @@ if __name__ == "__main__":
         print("The application will continue, but news may not be updated automatically")
     
     # Subscription Management Routes
-    @app.route("/subscriptions")
+    @app.route('/subscriptions')
     @login_required
     def subscriptions():
         """
         Display the user's subscriptions and available premium features
         """
+        user_id = g.user.id if g.user else None  # Ensure user_id is available
+
+        # --- Logic from the first definition ---
+        user_subscription = None
+        if user_id:
+            try:
+                response = supabase.from_('UserSubscriptions') \
+                    .select('*') \
+                    .eq('user_id', str(user_id)) \
+                    .single() \
+                    .execute()
+                if response.data:
+                    user_subscription = response.data
+                    if 'start_date' in user_subscription and user_subscription['start_date']:
+                        user_subscription['start_date_formatted'] = datetime.fromisoformat(
+                            user_subscription['start_date']).strftime('%Y-%m-%d %H:%M')
+                    if 'end_date' in user_subscription and user_subscription['end_date']:
+                        user_subscription['end_date_formatted'] = datetime.fromisoformat(
+                            user_subscription['end_date']).strftime('%Y-%m-%d %H:%M')
+            except Exception as e:
+                logger.error(f"Error fetching user subscription for {user_id}: {e}")
+                flash("Could not retrieve your subscription details.", "danger")
+
+        # --- Logic from the second definition ---
         # Get user's active subscriptions
         active_subscriptions = get_user_active_subscriptions()
-        
+
         # Get user's subscriptions (for checking which features are already subscribed)
         user_subscriptions = get_user_subscriptions()
-        
+
+        # --- Render the template, passing all necessary data ---
+        # You'll likely want to render 'subscriptions_plans.html' or combine content.
+        # If 'subscriptions.html' is meant for current status and 'subscriptions_plans.html' for management,
+        # you might need to decide which view is primary for /subscriptions, or redirect,
+        # or render based on query parameters.
+        # For simplicity, let's assume subscriptions_plans.html is the target:
         return render_template(
             "subscriptions_plans.html",
             active_subscriptions=active_subscriptions,
-            available_features=FEATURES,
-            user_subscriptions=user_subscriptions
-        )
-    
-    @app.route("/feature/<feature_id>")
-    @login_required
-    def compare_feature_tiers(feature_id):
-        """
-        Display comparison between free and premium tiers for a specific feature
-        """
-        # Check if feature exists
-        if feature_id not in FEATURES:
-            flash("Feature not found", "error")
-            return redirect(url_for("subscriptions"))
-        
-        # Get feature comparison data
-        comparison = get_feature_comparison(feature_id)
-        
-        # Get user's tier for this feature
-        user_tier = get_feature_tier(feature_id)
-        
-        return render_template(
-            "feature_comparison.html",
-            comparison=comparison,
-            user_tier=user_tier
+            available_features=FEATURES,  # Assuming FEATURES is defined elsewhere
+            user_subscriptions=user_subscriptions,
+            current_user_subscription_details=user_subscription  # Pass the first one's data too
         )
     
     @app.route("/purchase/<feature_id>")
@@ -1762,7 +1770,7 @@ if __name__ == "__main__":
         # Redirect to the feature comparison page for career test
         return redirect(url_for("compare_feature_tiers", feature_id="career_test"))
     
-    @app.route('/career-test')
+    @app.route('/career-fit-test')
     @login_required
     def career_test():
         """
