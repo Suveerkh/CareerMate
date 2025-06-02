@@ -39,6 +39,7 @@ load_dotenv()
 app = Flask(__name__)
 # Set a secret key for session management
 app.secret_key = str(os.getenv("SECRET_KEY", "dev_secret_key"))
+app.config["SESSION_TYPE"] = "filesystem"
 # Set session to be permanent and last for 30 days
 app.permanent_session_lifetime = datetime.timedelta(days=30)
 
@@ -1639,23 +1640,6 @@ def pricing():
     
     return render_template("pricing.html", user_plan=user_plan)
 
-if __name__ == "__main__":
-    # Initialize Supabase when running the app directly
-    try:
-        init_supabase()
-        print("Supabase client initialized successfully")
-    except Exception as e:
-        print(f"Warning: Failed to initialize Supabase client: {str(e)}")
-        print("The application will continue, but database operations may fail")
-    
-    # Start the news updater in a background thread
-    try:
-        start_news_updater()
-        print("News updater started in background thread")
-    except Exception as e:
-        print(f"Warning: Failed to start news updater: {str(e)}")
-        print("The application will continue, but news may not be updated automatically")
-    
     # Subscription Management Routes
     @app.route('/subscriptions')
     @login_required
