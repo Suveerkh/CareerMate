@@ -1599,29 +1599,48 @@ def report_bugs():
 @app.route('/subscriptions')
 @login_required
 def subscriptions():
-    user_subscription = None
-    if g.user:
+    """
+    Display the user's subscriptions and available premium features.
+    Combines logic from both previous /subscriptions definitions.
+    """
+    user_id = g.user.id if g.user else None
+
+    user_subscription_details = None # This will hold the 'single' subscription data
+    if user_id:
         try:
-            # Use the regular Supabase client (anon key) for SELECT as RLS is enabled
-            # and users can only view their own data.
+            # Logic from the original first 'subscriptions' definition
+            # Fetch single user subscription (if applicable, e.g., current main plan)
             response = supabase.from_('UserSubscriptions') \
                                .select('*') \
-                               .eq('user_id', str(g.user.id)) \
+                               .eq('user_id', str(user_id)) \
                                .single() \
                                .execute()
             if response.data:
-                user_subscription = response.data
+                user_subscription_details = response.data
                 # Format dates for display
-                if 'start_date' in user_subscription and user_subscription['start_date']:
-                    user_subscription['start_date_formatted'] = datetime.fromisoformat(user_subscription['start_date']).strftime('%Y-%m-%d %H:%M')
-                if 'end_date' in user_subscription and user_subscription['end_date']:
-                    user_subscription['end_date_formatted'] = datetime.fromisoformat(user_subscription['end_date']).strftime('%Y-%m-%d %H:%M')
+                if 'start_date' in user_subscription_details and user_subscription_details['start_date']:
+                    user_subscription_details['start_date_formatted'] = datetime.fromisoformat(user_subscription_details['start_date']).strftime('%Y-%m-%d %H:%M')
+                if 'end_date' in user_subscription_details and user_subscription_details['end_date']:
+                    user_subscription_details['end_date_formatted'] = datetime.fromisoformat(user_subscription_details['end_date']).strftime('%Y-%m-%d %H:%M')
 
         except Exception as e:
-            logger.error(f"Error fetching user subscription for {g.user.id}: {e}")
-            flash("Could not retrieve your subscription details.", "danger")
+            logger.error(f"Error fetching primary user subscription for {user_id}: {e}")
+            flash("Could not retrieve your primary subscription details.", "danger")
 
-    return render_template('subscriptions.html', user_subscription=user_subscription)
+    # Logic from the original second 'subscriptions' definition
+    # Get user's active subscriptions (if this is different from the 'single' one above, e.g., multiple features)
+    active_subscriptions = get_user_active_subscriptions()
+
+    # Get user's subscriptions (for checking which features are already subscribed)
+    user_subscriptions = get_user_subscriptions()
+
+    return render_template(
+        "subscriptions_plans.html", # Or 'subscriptions.html', depending on your UI design
+        active_subscriptions=active_subscriptions,
+        available_features=FEATURES,  # Assuming FEATURES is defined elsewhere
+        user_subscriptions=user_subscriptions,
+        current_user_subscription_details=user_subscription_details # Pass the single subscription data
+    )
 
 @app.route("/tools")
 @login_required
@@ -1639,58 +1658,6 @@ def pricing():
     
     return render_template("pricing.html", user_plan=user_plan)
 
-# Subscription Management Routes
-@app.route('/subscriptions')
-@login_required
-def subscriptions():
-    """
-    Display the user's subscriptions and available premium features
-    """
-    user_id = g.user.id if g.user else None  # Ensure user_id is available
-
-    # --- Logic from the first definition ---
-    user_subscription = None
-    if user_id:
-        try:
-            response = supabase.from_('UserSubscriptions') \
-                .select('*') \
-                .eq('user_id', str(user_id)) \
-                .single() \
-                .execute()
-            if response.data:
-                user_subscription = response.data
-                if 'start_date' in user_subscription and user_subscription['start_date']:
-                    user_subscription['start_date_formatted'] = datetime.fromisoformat(
-                        user_subscription['start_date']).strftime('%Y-%m-%d %H:%M')
-                if 'end_date' in user_subscription and user_subscription['end_date']:
-                    user_subscription['end_date_formatted'] = datetime.fromisoformat(
-                        user_subscription['end_date']).strftime('%Y-%m-%d %H:%M')
-        except Exception as e:
-            logger.error(f"Error fetching user subscription for {user_id}: {e}")
-            flash("Could not retrieve your subscription details.", "danger")
-
-    # --- Logic from the second definition ---
-    # Get user's active subscriptions
-    active_subscriptions = get_user_active_subscriptions()
-
-    # Get user's subscriptions (for checking which features are already subscribed)
-    user_subscriptions = get_user_subscriptions()
-
-    # --- Render the template, passing all necessary data ---
-    # You'll likely want to render 'subscriptions_plans.html' or combine content.
-    # If 'subscriptions.html' is meant for current status and 'subscriptions_plans.html' for management,
-    # you might need to decide which view is primary for /subscriptions, or redirect,
-    # or render based on query parameters.
-    # For simplicity, let's assume subscriptions_plans.html is the target:
-    return render_template(
-        "subscriptions_plans.html",
-        active_subscriptions=active_subscriptions,
-        available_features=FEATURES,  # Assuming FEATURES is defined elsewhere
-        user_subscriptions=user_subscriptions,
-        current_user_subscription_details=user_subscription  # Pass the first one's data too
-    )
-
-@app.route("/purchase/<feature_id>")
 @login_required
 def purchase_feature_subscription(feature_id):
     """
